@@ -1,0 +1,19 @@
+{
+  "name": "@ephem-sh/debuger",
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "debuger": "./src/index.ts"
+  },
+  "files": ["src", "dist"],
+  "scripts": {
+    "build": "bun build ./src/index.ts --outdir ./dist --target node --entry-naming debuger",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ephem-sh/debuger-core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

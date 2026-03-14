@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://debuger.dev/protocol/schema.json",
+  "title": "Debuger IPC Protocol",
+  "description": "Message types for IPC between the CLI client and the dev server bridge.",
+
+  "definitions": {
+    "LogLevel": {
+      "type": "string",
+      "enum": ["log", "warn", "error", "debug", "info"]
+    },
+
+    "Source": {
+      "type": "string",
+      "enum": ["browser", "server"]
+    },
+
+    "ConsoleEntry": {
+      "type": "object",
+      "required": ["type", "level", "args", "timestamp", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "console" },
+        "level": { "$ref": "#/definitions/LogLevel" },
+        "args": {
+          "type": "array",
+          "description": "Serialized console arguments.",
+          "items": {}
+        },
+        "timestamp": { "type": "number", "description": "Unix epoch ms." },
+        "source": { "$ref": "#/definitions/Source" }
+      }
+    },
+
+    "ErrorEntry": {
+      "type": "object",
+      "required": ["type", "message", "stack", "timestamp", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "error" },
+        "message": { "type": "string" },
+        "stack": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "source": { "$ref": "#/definitions/Source" },
+        "url": { "type": "string" },
+        "component": { "type": "string" }
+      }
+    },
+
+    "NetworkEntry": {
+      "type": "object",
+      "required": ["type", "url", "method", "status", "duration", "timestamp"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "network" },
+        "url": { "type": "string" },
+        "method": { "type": "string" },
+        "status": { "type": "integer" },
+        "duration": { "type": "number", "description": "Duration in ms." },
+        "timestamp": { "type": "number" },
+        "requestHeaders": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "responseHeaders": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+
+    "ContextEntry": {
+      "type": "object",
+      "required": ["type", "url", "framework", "sessionId", "port", "pid", "startedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "context" },
+        "url": { "type": "string" },
+        "framework": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "port": { "type": "integer" },
+        "pid": { "type": "integer" },
+        "startedAt": { "type": "number" }
+      }
+    },
+
+    "LogEntry": {
+      "oneOf": [
+        { "$ref": "#/definitions/ConsoleEntry" },
+        { "$ref": "#/definitions/ErrorEntry" },
+        { "$ref": "#/definitions/NetworkEntry" },
+        { "$ref": "#/definitions/ContextEntry" }
+      ]
+    },
+
+    "SessionInfo": {
+      "type": "object",
+      "required": ["sessionId", "pid", "port", "startedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": "string" },
+        "pid": { "type": "integer" },
+        "port": { "type": "integer" },
+        "startedAt": { "type": "number" }
+      }
+    },
+
+    "Request": {
+      "type": "object",
+      "required": ["id", "command"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "command": {
+          "type": "string",
+          "enum": ["errors", "console", "network", "status", "all"]
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "last": { "type": "integer", "description": "Return entries from the last N seconds." },
+            "level": { "$ref": "#/definitions/LogLevel" },
+            "status": { "type": "integer", "description": "Filter network entries by HTTP status." },
+            "failed": { "type": "boolean", "description": "If true, return only failed network requests (status >= 400)." },
+            "limit": { "type": "integer", "description": "Max number of entries to return." }
+          }
+        }
+      }
+    },
+
+    "Response": {
+      "type": "object",
+      "required": ["id", "ok", "data"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "ok": { "type": "boolean" },
+        "data": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/LogEntry" }
+        },
+        "session": { "$ref": "#/definitions/SessionInfo" }
+      }
+    }
+  },
+
+  "oneOf": [
+    { "$ref": "#/definitions/Request" },
+    { "$ref": "#/definitions/Response" }
+  ]
+}

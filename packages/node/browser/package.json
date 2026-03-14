@@ -1,0 +1,15 @@
+{
+  "name": "@ephem-sh/debuger-browser",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "src/client.ts",
+  "types": "src/client.ts",
+  "files": ["src", "dist"],
+  "scripts": {
+    "build": "bun build ./src/client.ts --outdir ./dist --target browser --format iife",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
