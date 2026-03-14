@@ -45,7 +45,7 @@ export async function register(): Promise<void> {
     // IPC bridge is optional — warn handled inside createBridge
   }
 
-  console.log(`\x1b[32m✓\x1b[0m @ephem-sh/debugger injected at session: ${session.sessionId}`)
+  process.stdout.write(`\x1b[32m✓\x1b[0m @ephem-sh/debugger injected at session: ${session.sessionId}\n`)
 
   const cleanup = async () => {
     unpatchConsole()

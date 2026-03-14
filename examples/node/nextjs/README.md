@@ -1,3 +1,36 @@
+## @ephem-sh/debugger
+
+**Install:**
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+**Setup** — add `instrumentation.ts` and `DebuggerScript`:
+
+```ts
+// instrumentation.ts
+export { register, onRequestError } from '@ephem-sh/debugger/nextjs'
+```
+
+```tsx
+// app/layout.tsx
+import { DebuggerScript } from '@ephem-sh/debugger/nextjs/script'
+// inside <body>:
+<DebuggerScript />
+```
+
+**Health check:**
+
+```bash
+npm run dev
+npx dbg status
+```
+
+[Full documentation](https://github.com/ephem-sh/debugger/tree/main/docs) | Happy debugging!
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

@@ -19,6 +19,18 @@
       "edge-light": "./dist/adapters/nextjs/noop.js",
       "types": "./dist/adapters/nextjs/script.d.ts",
       "import": "./dist/adapters/nextjs/script.js"
+    },
+    "./vite": {
+      "types": "./dist/adapters/vite/index.d.ts",
+      "import": "./dist/adapters/vite/index.js"
+    },
+    "./vite/sveltekit": {
+      "types": "./dist/adapters/vite/sveltekit.d.ts",
+      "import": "./dist/adapters/vite/sveltekit.js"
+    },
+    "./vite/react-router": {
+      "types": "./dist/adapters/vite/react-router.d.ts",
+      "import": "./dist/adapters/vite/react-router.js"
     }
   },
   "files": [
@@ -32,7 +44,8 @@
   },
   "peerDependencies": {
     "next": ">=14",
-    "react": ">=18"
+    "react": ">=18",
+    "vite": ">=5"
   },
   "peerDependenciesMeta": {
     "next": {
@@ -40,10 +53,14 @@
     },
     "react": {
       "optional": true
+    },
+    "vite": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@types/react": "^19",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^6"
   }
 }
