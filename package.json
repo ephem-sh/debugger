@@ -2,14 +2,16 @@
   "name": "debuger",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "examples/*"
+    "packages/*"
   ],
   "scripts": {
     "build": "bun run --cwd packages/debugger build",
     "typecheck": "bun run --cwd packages/debugger typecheck",
-    "dev:nextjs": "bun run --cwd examples/nextjs dev",
-    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s"
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
+    "example": "bun run scripts/example.ts",
+    "install:example": "bun run scripts/example.ts install",
+    "dev:example": "bun run scripts/example.ts dev",
+    "examples": "bun run scripts/example.ts list"
   },
   "devDependencies": {
     "@types/bun": "latest",
