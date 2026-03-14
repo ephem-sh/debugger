@@ -1,0 +1,59 @@
+---
+title: Qwik
+description: Set up debugger in a Qwik project.
+order: 10
+---
+
+# Qwik
+
+This guide covers adding debugger to a Qwik City project. The setup
+takes two steps.
+
+## 1. Add the Vite plugin
+
+Update your Vite config:
+
+```ts
+// vite.config.ts
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [qwikCity(), qwikVite(), debuggerPlugin()],
+})
+```
+
+## 2. Add script tags to root
+
+In `src/root.tsx`, add the browser client inside `<body>`:
+
+```tsx
+import { isDev } from '@builder.io/qwik'
+
+// inside <body>, after <RouterOutlet />:
+{isDev && (
+  <>
+    <script dangerouslySetInnerHTML={
+      `window.__DEBUGGER_INGEST_URL__="/_/d";`
+    } />
+    <script src="/_/d.js" defer />
+  </>
+)}
+```
+
+## Verify
+
+```bash
+npm run dev
+npx dbg status
+npx dbg browser console
+```
+
+## Production safety
+
+The `isDev` check ensures script tags only render during development.
+The Vite plugin uses `apply: 'serve'`.
+
+## Full example
+
+See the complete working example at
+[examples/node/qwik](https://github.com/ephem-sh/debugger/tree/main/examples/node/qwik).

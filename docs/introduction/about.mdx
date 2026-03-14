@@ -29,10 +29,10 @@ debugger has three parts:
 ## Architecture
 
 ```
-Browser --> same-origin POST /_/d --> Next.js server --> LogStore (ring buffers)
-                                                              |
-Server console/errors ----------------------------------------+
-                                                              |
+Browser --> same-origin POST /_/d --> Dev server --> LogStore (ring buffers)
+                                                            |
+Server console/errors --------------------------------------+
+                                                            |
 CLI (dbg) --> IPC socket/pipe --> LogStore --> formatted output
 ```
 

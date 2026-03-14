@@ -81,6 +81,7 @@ export class LogStore {
       case 'app':
         entries = this.app.toArray()
         break
+      case 'push':
       case 'status':
         return []
       case 'all':

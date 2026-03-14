@@ -1,0 +1,75 @@
+---
+title: TanStack Start
+description: Set up debugger in a TanStack Start project.
+order: 11
+---
+
+# TanStack Start
+
+This guide covers adding debugger to a TanStack Start project. The
+setup takes three steps because TanStack Start uses Nitro, which runs
+in a separate process from Vite.
+
+## 1. Add the Vite plugin
+
+Update your Vite config:
+
+```ts
+// vite.config.ts
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [tanstackStart(), viteReact(), debuggerPlugin()],
+})
+```
+
+## 2. Add the script component
+
+In `src/routes/__root.tsx`, import and render `DebuggerScript` after
+`<Scripts />`:
+
+```tsx
+import { DebuggerScript } from '@ephem-sh/debugger/vite/react-router'
+
+// inside <body>, after <Scripts />:
+<DebuggerScript />
+```
+
+## 3. Add the server entry
+
+Create or update `src/server.ts`:
+
+```ts
+import handler, { createServerEntry } from '@tanstack/react-start/server-entry'
+import { withDebugger } from '@ephem-sh/debugger/vite/tanstack-start'
+
+export default withDebugger(createServerEntry, handler)
+```
+
+## Verify
+
+```bash
+npm run dev
+npx dbg status
+npx dbg browser console
+```
+
+## Why three steps?
+
+TanStack Start uses Nitro as its server runtime. Nitro runs in an
+isolated worker process that doesn't share memory with the Vite dev
+server. The `withDebugger` wrapper intercepts browser log requests
+in Nitro's process and forwards them to the debugger log store via
+IPC.
+
+## Production safety
+
+The Vite plugin uses `apply: 'serve'`. `DebuggerScript` returns null
+when `import.meta.env.PROD` is true. The `withDebugger` wrapper only
+adds request interception — it passes all other requests through
+unchanged.
+
+## Full example
+
+See the complete working example at
+[examples/node/tanstack-start](https://github.com/ephem-sh/debugger/tree/main/examples/node/tanstack-start).

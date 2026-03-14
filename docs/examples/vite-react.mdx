@@ -1,0 +1,82 @@
+---
+title: Vite + React
+description: Set up debugger in a Vite + React project.
+order: 4
+---
+
+# Vite + React
+
+This guide covers adding debugger to a Vite + React project. The
+setup takes one step.
+
+## Prerequisites
+
+- Vite 5 or later
+
+## 1. Add the plugin
+
+Import and add `debuggerPlugin` to your Vite config:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [react(), debuggerPlugin()],
+})
+```
+
+That's it. No other files to create or modify.
+
+## Verify
+
+Start your dev server:
+
+```bash
+npm run dev
+```
+
+The terminal output includes the debugger session line:
+
+```
+  VITE v8.x.x  ready in 500 ms
+
+  -> Local:   http://localhost:5173/
+  -> @ephem-sh/debugger: session dev-abc123
+```
+
+Open your app in a browser, then query with the CLI:
+
+```bash
+npx dbg status
+npx dbg browser console
+npx dbg server console
+```
+
+## How it works
+
+The Vite plugin does three things during development:
+
+1. **`configureServer`** creates the log store, patches server-side
+   console methods, starts the IPC bridge, and adds connect middleware
+   for the ingest endpoint (`/_/d`) and client script (`/_/d.js`).
+
+2. **`transformIndexHtml`** injects two script tags into your HTML:
+   one sets the ingest URL, the other loads the browser client.
+
+3. **`apply: 'serve'`** ensures the plugin only runs in dev mode.
+   Vite strips it entirely from production builds.
+
+## Production safety
+
+The `apply: 'serve'` option means debugger is never included in
+production builds. There's no runtime check needed — Vite removes
+the plugin at build time. Your production bundle has zero debugger
+code.
+
+## Full example
+
+See the complete working example at
+[examples/node/react-vite](https://github.com/ephem-sh/debugger/tree/main/examples/node/react-vite).

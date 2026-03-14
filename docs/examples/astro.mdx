@@ -1,0 +1,62 @@
+---
+title: Astro
+description: Set up debugger in an Astro project.
+order: 8
+---
+
+# Astro
+
+This guide covers adding debugger to an Astro project. The setup
+takes two steps.
+
+## 1. Add the Vite plugin
+
+Update your Astro config:
+
+```ts
+// astro.config.mjs
+import { defineConfig } from 'astro/config'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  vite: {
+    plugins: [debuggerPlugin()],
+  },
+})
+```
+
+## 2. Add the middleware
+
+Create `src/middleware.ts`:
+
+```ts
+export { onRequest } from '@ephem-sh/debugger/vite/astro'
+```
+
+If you have existing middleware, compose with `sequence`:
+
+```ts
+import { sequence } from 'astro:middleware'
+import { onRequest as debuggerMiddleware } from '@ephem-sh/debugger/vite/astro'
+
+export const onRequest = sequence(debuggerMiddleware, yourMiddleware)
+```
+
+## Verify
+
+```bash
+npm run dev
+npx dbg status
+npx dbg browser console
+```
+
+## Production safety
+
+The Vite plugin uses `apply: 'serve'` and is stripped from production
+builds. The middleware checks for `</body>` and the debugger script
+before injecting — no injection occurs in production.
+
+## Full example
+
+See the complete working example at
+[examples/node/astro](https://github.com/ephem-sh/debugger/tree/main/examples/node/astro).

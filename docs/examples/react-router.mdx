@@ -1,0 +1,95 @@
+---
+title: React Router v7
+description: Set up debugger in a React Router v7 project.
+order: 7
+---
+
+# React Router v7
+
+This guide covers adding debugger to a React Router v7 (framework
+mode) project. The setup takes two steps because React Router uses
+server-side rendering that bypasses Vite's `transformIndexHtml`.
+
+## Prerequisites
+
+- React Router 7 or later (Vite-based)
+
+## 1. Add the Vite plugin
+
+Import and add `debuggerPlugin` to your Vite config:
+
+```ts
+// vite.config.ts
+import { reactRouter } from '@react-router/dev/vite'
+import { defineConfig } from 'vite'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [reactRouter(), debuggerPlugin()],
+})
+```
+
+This sets up the server-side instrumentation (console patching, IPC
+bridge, ingest middleware).
+
+## 2. Add the script component
+
+Import and render `DebuggerScript` in your `app/root.tsx` Layout,
+after `<Scripts />`:
+
+```tsx
+// app/root.tsx
+import { Scripts, ScrollRestoration } from 'react-router'
+import { DebuggerScript } from '@ephem-sh/debugger/vite/react-router'
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+        <DebuggerScript />
+      </body>
+    </html>
+  )
+}
+```
+
+`DebuggerScript` injects the browser client during development. In
+production, it returns null.
+
+## Verify
+
+Start your dev server:
+
+```bash
+npm run dev
+```
+
+Open your app in a browser, then query with the CLI:
+
+```bash
+npx dbg status
+npx dbg browser console
+npx dbg server console
+```
+
+## Why two steps?
+
+React Router v7 renders HTML on the server using its own streaming
+pipeline, bypassing Vite's `transformIndexHtml` hook. The Vite
+plugin handles server-side setup, but the `DebuggerScript` component
+is needed to inject the browser client into the rendered HTML.
+
+## Production safety
+
+The Vite plugin uses `apply: 'serve'` and is stripped from
+production builds. `DebuggerScript` checks `import.meta.env.PROD`
+and returns null in production. Your production bundle has zero
+debugger code.
+
+## Full example
+
+See the complete working example at
+[examples/node/react-router](https://github.com/ephem-sh/debugger/tree/main/examples/node/react-router).

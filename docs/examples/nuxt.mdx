@@ -1,0 +1,55 @@
+---
+title: Nuxt
+description: Set up debugger in a Nuxt project.
+order: 9
+---
+
+# Nuxt
+
+This guide covers adding debugger to a Nuxt project. The setup
+takes two steps.
+
+## 1. Add the Vite plugin
+
+Update your Nuxt config:
+
+```ts
+// nuxt.config.ts
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineNuxtConfig({
+  vite: {
+    plugins: [debuggerPlugin()],
+  },
+})
+```
+
+## 2. Add the Nitro plugin
+
+Create `server/plugins/debugger.ts`:
+
+```ts
+export { default } from '@ephem-sh/debugger/nitro'
+```
+
+This handles browser log ingestion and script injection for Nuxt's
+SSR pipeline.
+
+## Verify
+
+```bash
+npm run dev
+npx dbg status
+npx dbg browser console
+```
+
+## Production safety
+
+The Vite plugin uses `apply: 'serve'` and is stripped from production
+builds. The Nitro plugin's `render:html` hook only injects scripts
+when the debugger is active.
+
+## Full example
+
+See the complete working example at
+[examples/node/nuxt](https://github.com/ephem-sh/debugger/tree/main/examples/node/nuxt).

@@ -1,0 +1,60 @@
+---
+title: Waku
+description: Set up debugger in a Waku project.
+order: 12
+---
+
+# Waku
+
+This guide covers adding debugger to a Waku project. The setup takes
+one config change plus a layout update.
+
+## 1. Add the Vite plugin
+
+Update your Waku config:
+
+```ts
+// waku.config.ts
+import { defineConfig } from 'waku/config'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  vite: {
+    plugins: [debuggerPlugin()],
+  },
+})
+```
+
+## 2. Add script tags to layout
+
+In your root layout (`src/pages/_layout.tsx`), add the browser client
+script tags:
+
+```tsx
+{process.env.NODE_ENV === 'development' && (
+  <>
+    <script dangerouslySetInnerHTML={{
+      __html: 'window.__DEBUGGER_INGEST_URL__="/_/d";'
+    }} />
+    <script src="/_/d.js" defer />
+  </>
+)}
+```
+
+## Verify
+
+```bash
+npm run dev
+npx dbg status
+npx dbg browser console
+```
+
+## Production safety
+
+The `NODE_ENV` check prevents script injection in production. The
+Vite plugin uses `apply: 'serve'`.
+
+## Full example
+
+See the complete working example at
+[examples/node/waku](https://github.com/ephem-sh/debugger/tree/main/examples/node/waku).

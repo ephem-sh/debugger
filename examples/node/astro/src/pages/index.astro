@@ -1,0 +1,95 @@
+---
+---
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Astro — Debugger Test</title>
+</head>
+<body style="margin: 0; font-family: system-ui, -apple-system, sans-serif;">
+  <main style="max-width: 640px; margin: 0 auto; padding: 32px 16px;">
+    <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 24px;">Astro — Debugger Test</h1>
+
+    <section style="margin-bottom: 24px;">
+      <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 8px; color: #6b7280;">Console & Errors</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <button data-action="log" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">console.log</button>
+        <button data-action="warn" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">console.warn</button>
+        <button data-action="error" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">console.error</button>
+        <button data-action="throw" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Throw Error</button>
+        <button data-action="reject" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Unhandled Rejection</button>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 24px;">
+      <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 8px; color: #6b7280;">Network</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <button data-action="fetch-ok" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Fetch Success</button>
+        <button data-action="fetch-err" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Fetch Error</button>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="font-size: 14px; font-weight: 600; margin: 0 0 8px; color: #6b7280;">Application State</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <button data-action="set-cookie" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Set Cookie</button>
+        <button data-action="rm-cookies" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Remove Cookies</button>
+        <button data-action="set-local" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Set localStorage</button>
+        <button data-action="clear-local" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Clear localStorage</button>
+        <button data-action="set-session" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Set sessionStorage</button>
+        <button data-action="clear-session" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Clear sessionStorage</button>
+        <button data-action="fill-all" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Fill All</button>
+        <button data-action="clear-all" style="padding: 8px 16px; font-size: 14px; font-weight: 500; border: 1px solid #e5e7eb; border-radius: 8px; background: none; cursor: pointer;">Clear All</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function removeCookies() {
+      document.cookie.split(";").forEach(function(c) {
+        var name = c.split("=")[0].trim();
+        if (name.startsWith("debugger_") || name.startsWith("dbg_")) {
+          document.cookie = name + "=; path=/; max-age=0";
+        }
+      });
+    }
+    function clearLocal() {
+      Object.keys(localStorage).filter(function(k) { return k.startsWith("dbg_") || k.startsWith("debugger_"); }).forEach(function(k) { localStorage.removeItem(k); });
+    }
+    function clearSession() {
+      Object.keys(sessionStorage).filter(function(k) { return k.startsWith("dbg_") || k.startsWith("debugger_"); }).forEach(function(k) { sessionStorage.removeItem(k); });
+    }
+
+    var actions = {
+      "log": function() { console.log("[debugger:test] log", { id: crypto.randomUUID().slice(0, 8), ts: new Date().toISOString() }); },
+      "warn": function() { console.warn("[debugger:test] warn", { id: crypto.randomUUID().slice(0, 8), ts: new Date().toISOString() }); },
+      "error": function() { console.error("[debugger:test] error", { id: crypto.randomUUID().slice(0, 8), ts: new Date().toISOString() }, new Error("test error")); },
+      "throw": function() { setTimeout(function() { throw new Error("unhandled " + crypto.randomUUID().slice(0, 8)); }, 0); },
+      "reject": function() { Promise.reject(new Error("rejection " + crypto.randomUUID().slice(0, 8))); },
+      "fetch-ok": function() { fetch("/api/test?id=" + crypto.randomUUID().slice(0, 8)); },
+      "fetch-err": function() { fetch("/api/test?error=true&id=" + crypto.randomUUID().slice(0, 8)); },
+      "set-cookie": function() { document.cookie = "debugger_test_" + Date.now().toString(36) + "=value_" + Math.random().toString(36).slice(2, 6) + "; path=/; max-age=3600; SameSite=Lax"; },
+      "rm-cookies": removeCookies,
+      "set-local": function() { localStorage.setItem("dbg_local_" + Date.now().toString(36), JSON.stringify({ created: new Date().toISOString(), random: Math.random() })); },
+      "clear-local": clearLocal,
+      "set-session": function() { sessionStorage.setItem("dbg_session_" + Date.now().toString(36), new Date().toISOString()); },
+      "clear-session": clearSession,
+      "fill-all": function() {
+        var id = crypto.randomUUID().slice(0, 8);
+        document.cookie = "debugger_test_" + id + "=fill_" + id + "; path=/; max-age=3600; SameSite=Lax";
+        localStorage.setItem("dbg_local_" + id, JSON.stringify({ created: new Date().toISOString(), id: id }));
+        sessionStorage.setItem("dbg_session_" + id, new Date().toISOString());
+      },
+      "clear-all": function() { removeCookies(); clearLocal(); clearSession(); }
+    };
+
+    document.querySelectorAll("[data-action]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var action = btn.getAttribute("data-action");
+        if (action && actions[action]) actions[action]();
+      });
+    });
+  </script>
+</body>
+</html>

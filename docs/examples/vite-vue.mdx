@@ -1,0 +1,74 @@
+---
+title: Vite + Vue
+description: Set up debugger in a Vite + Vue project.
+order: 5
+---
+
+# Vite + Vue
+
+This guide covers adding debugger to a Vite + Vue project. The
+setup takes one step.
+
+## Prerequisites
+
+- Vite 5 or later
+- Vue 3
+
+## 1. Add the plugin
+
+Import and add `debuggerPlugin` to your Vite config:
+
+```ts
+// vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [vue(), debuggerPlugin()],
+})
+```
+
+That's it. No other files to create or modify.
+
+## Verify
+
+Start your dev server:
+
+```bash
+npm run dev
+```
+
+The terminal output includes the debugger session line:
+
+```
+  VITE v7.x.x  ready in 500 ms
+
+  -> Local:   http://localhost:5173/
+  -> @ephem-sh/debugger: session dev-abc123
+```
+
+Open your app in a browser, then query with the CLI:
+
+```bash
+npx dbg status
+npx dbg browser console
+npx dbg server console
+```
+
+## How it works
+
+The Vite plugin uses `transformIndexHtml` to inject the browser
+client into your HTML and `configureServer` to add the ingest
+middleware. Vue's single-file components, the Composition API, and
+Vue DevTools all work normally alongside debugger.
+
+## Production safety
+
+The `apply: 'serve'` option means debugger is never included in
+production builds. Your production bundle has zero debugger code.
+
+## Full example
+
+See the complete working example at
+[examples/node/vue](https://github.com/ephem-sh/debugger/tree/main/examples/node/vue).

@@ -52,6 +52,7 @@ export function debuggerPlugin(): Plugin {
         : 5173
       const session = createSession({ framework: 'vite', port })
       const logStore = new LogStore(session)
+      ;(globalThis as Record<string, unknown>).__DEBUGGER_LOG_STORE__ = logStore
 
       const unpatchConsole = patchConsole(logStore)
 

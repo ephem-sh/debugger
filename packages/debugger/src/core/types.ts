@@ -124,7 +124,7 @@ export interface SessionInfo {
 /** NDJSON request sent by the CLI over IPC. */
 export interface QueryRequest {
   id: string
-  command: 'errors' | 'console' | 'network' | 'app' | 'status' | 'all'
+  command: 'errors' | 'console' | 'network' | 'app' | 'status' | 'all' | 'push'
   filters?: {
     /** Look up a single entry by ID. */
     id?: string

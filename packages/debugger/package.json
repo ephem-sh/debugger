@@ -31,6 +31,26 @@
     "./vite/react-router": {
       "types": "./dist/adapters/vite/react-router.d.ts",
       "import": "./dist/adapters/vite/react-router.js"
+    },
+    "./vite/astro": {
+      "types": "./dist/adapters/vite/astro.d.ts",
+      "import": "./dist/adapters/vite/astro.js"
+    },
+    "./vite/tanstack-start": {
+      "types": "./dist/adapters/vite/tanstack-start.d.ts",
+      "import": "./dist/adapters/vite/tanstack-start.js"
+    },
+    "./vite/nuxt": {
+      "types": "./dist/adapters/vite/nuxt.d.ts",
+      "import": "./dist/adapters/vite/nuxt.js"
+    },
+    "./nitro": {
+      "types": "./dist/adapters/nitro/index.d.ts",
+      "import": "./dist/adapters/nitro/index.js"
+    },
+    "./angular": {
+      "types": "./dist/adapters/angular/index.d.ts",
+      "import": "./dist/adapters/angular/index.js"
     }
   },
   "files": [

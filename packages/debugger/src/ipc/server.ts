@@ -173,7 +173,16 @@ export function createBridge(logStore: LogStore, session: SessionInfo) {
     }
 
     try {
-      if (request.command === 'status') {
+      if (request.command === 'push') {
+        // Push entries from external processes (Nitro workers, etc.)
+        const entries = (request as unknown as { entries: unknown[] }).entries
+        if (Array.isArray(entries)) {
+          for (const entry of entries) {
+            logStore.push(entry as import('../core/types.js').LogEntry)
+          }
+        }
+        response.ok = true
+      } else if (request.command === 'status') {
         response.data = []
         response.session = logStore.getSession()
       } else {

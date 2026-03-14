@@ -1,0 +1,90 @@
+---
+title: SvelteKit
+description: Set up debugger in a SvelteKit project.
+order: 6
+---
+
+# SvelteKit
+
+This guide covers adding debugger to a SvelteKit project. The setup
+takes two steps because SvelteKit uses its own HTML rendering
+pipeline that bypasses Vite's `transformIndexHtml`.
+
+## Prerequisites
+
+- SvelteKit 2 or later (Vite 5+)
+
+## 1. Add the Vite plugin
+
+Import and add `debuggerPlugin` to your Vite config:
+
+```ts
+// vite.config.ts
+import { sveltekit } from '@sveltejs/kit/vite'
+import { defineConfig } from 'vite'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [sveltekit(), debuggerPlugin()],
+})
+```
+
+This sets up the server-side instrumentation (console patching, IPC
+bridge, ingest middleware).
+
+## 2. Add the server hook
+
+Create or update `src/hooks.server.ts`:
+
+```ts
+export { handle } from '@ephem-sh/debugger/vite/sveltekit'
+```
+
+This injects the browser client script into your HTML using
+SvelteKit's `transformPageChunk`.
+
+If you have existing hooks, compose them with `sequence`:
+
+```ts
+import { sequence } from '@sveltejs/kit/hooks'
+import { handle as debuggerHandle } from '@ephem-sh/debugger/vite/sveltekit'
+import { handle as yourHandle } from './your-hooks'
+
+export const handle = sequence(debuggerHandle, yourHandle)
+```
+
+## Verify
+
+Start your dev server:
+
+```bash
+npm run dev
+```
+
+Open your app in a browser, then query with the CLI:
+
+```bash
+npx dbg status
+npx dbg browser console
+npx dbg server console
+```
+
+## Why two steps?
+
+SvelteKit renders HTML on the server, bypassing Vite's
+`transformIndexHtml` hook. The Vite plugin handles server-side setup
+(console patching, IPC bridge, ingest endpoint), but SvelteKit's
+own `transformPageChunk` hook is needed to inject the browser
+client script into the rendered HTML.
+
+## Production safety
+
+The Vite plugin uses `apply: 'serve'` and is stripped from
+production builds. The `handle` hook checks for the `</body>` tag
+and the absence of the debugger script before injecting — if the
+Vite plugin isn't running (production), no script tags are added.
+
+## Full example
+
+See the complete working example at
+[examples/node/svelte](https://github.com/ephem-sh/debugger/tree/main/examples/node/svelte).

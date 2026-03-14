@@ -1,0 +1,58 @@
+---
+title: Angular
+description: Set up debugger in an Angular project.
+order: 13
+---
+
+# Angular
+
+This guide covers adding debugger to an Angular project with SSR.
+The setup takes two steps.
+
+## 1. Add script tags to index.html
+
+Add the debugger scripts to `src/index.html`, before `</body>`:
+
+```html
+<body>
+  <app-root></app-root>
+  <script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+  <script src="/_/d.js" defer></script>
+</body>
+```
+
+## 2. Instrument the server
+
+In `src/server.ts`, add the debugger instrumentation after creating
+the Express app:
+
+```ts
+import { instrumentExpress } from '@ephem-sh/debugger/angular'
+
+const app = express()
+instrumentExpress(app)
+```
+
+This sets up the log store, IPC bridge, console patching, and HTTP
+middleware for the ingest endpoint and browser client script. It
+no-ops when `NODE_ENV` is `production`.
+
+## Verify
+
+```bash
+npx ng serve
+npx dbg status
+npx dbg browser console
+```
+
+## Production safety
+
+`instrumentExpress` returns immediately when `NODE_ENV` is
+`production`. The script tags in `index.html` load `/_/d.js` which
+is only served by the debugger middleware in development — in
+production they silently fail with no impact.
+
+## Full example
+
+See the complete working example at
+[examples/node/angular](https://github.com/ephem-sh/debugger/tree/main/examples/node/angular).
