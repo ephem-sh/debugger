@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://debuger.dev/protocol/schema.json",
-  "title": "Debuger IPC Protocol",
-  "description": "Message types for IPC between the CLI client and the dev server bridge.",
+  "$id": "https://debugger.dev/protocol/schema.json",
+  "title": "Debugger IPC Protocol",
+  "description": "Message types for IPC between the CLI client and the debugger dev server bridge.",
 
   "definitions": {
     "LogLevel": {
@@ -21,6 +21,7 @@
       "additionalProperties": false,
       "properties": {
         "type": { "const": "console" },
+        "id": { "type": "string", "description": "Unique entry identifier (6-char hex)." },
         "level": { "$ref": "#/definitions/LogLevel" },
         "args": {
           "type": "array",
@@ -34,10 +35,11 @@
 
     "ErrorEntry": {
       "type": "object",
-      "required": ["type", "message", "stack", "timestamp", "source"],
+      "required": ["type", "message", "timestamp", "source"],
       "additionalProperties": false,
       "properties": {
         "type": { "const": "error" },
+        "id": { "type": "string", "description": "Unique entry identifier (6-char hex)." },
         "message": { "type": "string" },
         "stack": { "type": "string" },
         "timestamp": { "type": "number" },
@@ -49,38 +51,108 @@
 
     "NetworkEntry": {
       "type": "object",
-      "required": ["type", "url", "method", "status", "duration", "timestamp"],
+      "required": ["type", "url", "method", "status", "duration", "timestamp", "failed", "source"],
       "additionalProperties": false,
       "properties": {
         "type": { "const": "network" },
+        "id": { "type": "string", "description": "Unique entry identifier (6-char hex)." },
         "url": { "type": "string" },
         "method": { "type": "string" },
         "status": { "type": "integer" },
         "duration": { "type": "number", "description": "Duration in ms." },
         "timestamp": { "type": "number" },
+        "failed": { "type": "boolean" },
+        "source": { "const": "browser", "description": "Network entries always originate from the browser." },
+        "kind": { "type": "string", "enum": ["fetch", "xhr", "ws"], "description": "Transport kind that originated this request." },
         "requestHeaders": {
           "type": "object",
-          "additionalProperties": { "type": "string" }
+          "additionalProperties": { "type": "string" },
+          "description": "Request headers sent with the request."
         },
         "responseHeaders": {
           "type": "object",
-          "additionalProperties": { "type": "string" }
-        }
+          "additionalProperties": { "type": "string" },
+          "description": "Response headers received."
+        },
+        "responseBody": { "type": "string", "description": "Response body (capped at 4KB, captured for failed requests only)." },
+        "connectionId": { "type": "string", "description": "WebSocket connection identifier (WS only)." },
+        "messageCount": { "type": "integer", "description": "Number of WebSocket messages exchanged (WS only)." },
+        "wsReadyState": { "type": "integer", "description": "WebSocket readyState at capture time (WS only)." }
       }
     },
 
-    "ContextEntry": {
+    "CookieInfo": {
       "type": "object",
-      "required": ["type", "url", "framework", "sessionId", "port", "pid", "startedAt"],
+      "required": ["name", "value"],
       "additionalProperties": false,
       "properties": {
-        "type": { "const": "context" },
-        "url": { "type": "string" },
-        "framework": { "type": "string" },
-        "sessionId": { "type": "string" },
-        "port": { "type": "integer" },
-        "pid": { "type": "integer" },
-        "startedAt": { "type": "number" }
+        "name": { "type": "string" },
+        "value": { "type": "string" },
+        "domain": { "type": "string" },
+        "path": { "type": "string" },
+        "expires": { "type": "number" },
+        "secure": { "type": "boolean" },
+        "sameSite": { "type": "string" }
+      }
+    },
+
+    "ServiceWorkerInfo": {
+      "type": "object",
+      "required": ["scope", "scriptURL", "state"],
+      "additionalProperties": false,
+      "properties": {
+        "scope": { "type": "string" },
+        "scriptURL": { "type": "string" },
+        "state": { "type": "string" }
+      }
+    },
+
+    "CacheInfo": {
+      "type": "object",
+      "required": ["name", "entryCount"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "entryCount": { "type": "integer" }
+      }
+    },
+
+    "PermissionInfo": {
+      "type": "object",
+      "required": ["name", "state"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "state": { "type": "string", "enum": ["granted", "denied", "prompt"] }
+      }
+    },
+
+    "StorageEstimate": {
+      "type": "object",
+      "required": ["usage", "quota"],
+      "additionalProperties": false,
+      "properties": {
+        "usage": { "type": "number" },
+        "quota": { "type": "number" }
+      }
+    },
+
+    "AppEntry": {
+      "type": "object",
+      "required": ["type", "timestamp", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "app" },
+        "id": { "type": "string", "description": "Unique entry identifier (6-char hex)." },
+        "timestamp": { "type": "number", "description": "Unix epoch ms." },
+        "source": { "const": "browser" },
+        "cookies": { "type": "array", "items": { "$ref": "#/definitions/CookieInfo" } },
+        "localStorage": { "type": "object", "additionalProperties": { "type": "string" } },
+        "sessionStorage": { "type": "object", "additionalProperties": { "type": "string" } },
+        "serviceWorkers": { "type": "array", "items": { "$ref": "#/definitions/ServiceWorkerInfo" } },
+        "cacheStorage": { "type": "array", "items": { "$ref": "#/definitions/CacheInfo" } },
+        "permissions": { "type": "array", "items": { "$ref": "#/definitions/PermissionInfo" } },
+        "storageEstimate": { "$ref": "#/definitions/StorageEstimate" }
       }
     },
 
@@ -89,19 +161,21 @@
         { "$ref": "#/definitions/ConsoleEntry" },
         { "$ref": "#/definitions/ErrorEntry" },
         { "$ref": "#/definitions/NetworkEntry" },
-        { "$ref": "#/definitions/ContextEntry" }
+        { "$ref": "#/definitions/AppEntry" }
       ]
     },
 
     "SessionInfo": {
       "type": "object",
-      "required": ["sessionId", "pid", "port", "startedAt"],
+      "required": ["sessionId", "framework", "port", "pid", "startedAt", "socketPath"],
       "additionalProperties": false,
       "properties": {
         "sessionId": { "type": "string" },
-        "pid": { "type": "integer" },
+        "framework": { "type": "string" },
         "port": { "type": "integer" },
-        "startedAt": { "type": "number" }
+        "pid": { "type": "integer" },
+        "startedAt": { "type": "number" },
+        "socketPath": { "type": "string" }
       }
     },
 
@@ -113,17 +187,28 @@
         "id": { "type": "string" },
         "command": {
           "type": "string",
-          "enum": ["errors", "console", "network", "status", "all"]
+          "enum": ["errors", "console", "network", "status", "all", "app"]
         },
         "filters": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "last": { "type": "integer", "description": "Return entries from the last N seconds." },
-            "level": { "$ref": "#/definitions/LogLevel" },
-            "status": { "type": "integer", "description": "Filter network entries by HTTP status." },
-            "failed": { "type": "boolean", "description": "If true, return only failed network requests (status >= 400)." },
-            "limit": { "type": "integer", "description": "Max number of entries to return." }
+            "id": { "type": "string", "description": "Look up a single entry by ID." },
+            "ids": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Look up multiple entries by ID."
+            },
+            "last": { "type": "number", "description": "Return entries from the last N milliseconds." },
+            "level": { "type": "string" },
+            "status": { "type": "number", "description": "Filter network entries by HTTP status." },
+            "failed": { "type": "boolean", "description": "If true, return only failed network requests." },
+            "limit": { "type": "number", "description": "Max number of entries to return." },
+            "source": { "$ref": "#/definitions/Source", "description": "Filter entries by source (browser or server)." },
+            "subcommand": { "type": "string", "description": "Sub-command qualifier for the request." },
+            "name": { "type": "string", "description": "Filter by name." },
+            "key": { "type": "string", "description": "Filter by key." },
+            "storageType": { "type": "string", "description": "Filter by storage type." }
           }
         }
       }
@@ -140,7 +225,8 @@
           "type": "array",
           "items": { "$ref": "#/definitions/LogEntry" }
         },
-        "session": { "$ref": "#/definitions/SessionInfo" }
+        "session": { "$ref": "#/definitions/SessionInfo" },
+        "error": { "type": "string" }
       }
     }
   },

@@ -1,0 +1,128 @@
+---
+title: Next.js (App Router)
+description: Set up debugger in a Next.js App Router project.
+order: 3
+---
+
+# Next.js (App Router)
+
+This guide walks you through adding debugger to a Next.js project
+using the App Router. The setup takes three steps.
+
+## Prerequisites
+
+- Next.js 15 or later
+
+## 1. Install
+
+Add the package as a dev dependency:
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## 2. Add instrumentation
+
+Create or update `instrumentation.ts` in your project root:
+
+```ts
+export { register, onRequestError } from '@ephem-sh/debugger/nextjs'
+```
+
+This starts the IPC bridge and patches server-side `console.*` methods
+when the dev server boots. The `onRequestError` export captures SSR
+rendering errors.
+
+In production, both functions are no-ops with zero overhead.
+
+## 3. Add the browser script
+
+Import and render `DebuggerScript` in your root layout:
+
+```tsx
+// app/layout.tsx
+import { DebuggerScript } from '@ephem-sh/debugger/nextjs/script'
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <DebuggerScript />
+        {children}
+      </body>
+    </html>
+  )
+}
+```
+
+`DebuggerScript` injects the browser instrumentation script during
+development. In production, it renders nothing.
+
+## Verify
+
+Start your dev server:
+
+```bash
+npm run dev
+```
+
+You see a confirmation message in the terminal:
+
+```
+debugger injected at session: dev-abc123
+```
+
+Open your app in a browser, then query with the CLI:
+
+```bash
+npx dbg status
+npx dbg browser console
+npx dbg server console
+npx dbg browser network
+npx dbg browser cookies
+```
+
+## How it works
+
+The Next.js adapter does three things:
+
+1. **`register()`** runs at server startup via Next.js instrumentation.
+   It creates a log store, patches console methods, starts the IPC
+   bridge (Unix socket or Windows named pipe), and installs an HTTP
+   request interceptor for browser data collection.
+
+2. **HTTP intercept** handles `/_/d` (POST, browser log ingest) and
+   `/_/d.js` (GET, browser client script) on the same origin as your
+   Next.js dev server. No separate port, no cross-origin requests,
+   no ad-blocker interference.
+
+3. **`DebuggerScript`** renders two script tags in development:
+   one sets the ingest URL, the other loads the browser client. Both
+   use same-origin relative paths.
+
+## Edge Runtime
+
+debugger only runs in the Node.js runtime. The `edge-light` export
+condition maps to a no-op module, so importing in Edge Runtime
+middleware or routes does not cause errors.
+
+## Turbopack
+
+debugger works with both Webpack and Turbopack. No configuration
+changes are needed.
+
+## Production safety
+
+All three components are safe in production:
+
+- `register()` returns immediately if `NODE_ENV` isn't `development`
+- `DebuggerScript` returns `null` in production
+- `onRequestError` checks for the log store on `globalThis` and
+  no-ops if it isn't there
+
+You can safely leave the instrumentation and script tag in your code.
+They have zero cost in production builds.

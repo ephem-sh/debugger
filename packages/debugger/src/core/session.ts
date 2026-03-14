@@ -1,0 +1,38 @@
+import { createHash } from 'node:crypto'
+import path from 'node:path'
+import type { SessionInfo } from './types.js'
+
+function generateId(): string {
+  const hex = Math.random().toString(16).slice(2, 8)
+  return `dev-${hex}`
+}
+
+function computeSocketPath(): string {
+  if (process.platform === 'win32') {
+    const hash = createHash('md5').update(process.cwd()).digest('hex').slice(0, 8)
+    return `\\\\.\\pipe\\debugger-${hash}`
+  }
+  return path.join(process.cwd(), '.debugger', 'bridge.sock')
+}
+
+/**
+ * Create a new debugger session with a unique ID and platform-appropriate socket path.
+ *
+ * @param opts - Session options
+ * @param opts.framework - Framework name (e.g. "next", "remix")
+ * @param opts.port - Dev server port number
+ * @returns Fully populated session info ready for IPC bridge binding
+ */
+export function createSession(opts: {
+  framework: string
+  port: number
+}): SessionInfo {
+  return {
+    sessionId: generateId(),
+    framework: opts.framework,
+    port: opts.port,
+    pid: process.pid,
+    startedAt: Date.now(),
+    socketPath: computeSocketPath(),
+  }
+}

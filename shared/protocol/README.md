@@ -1,4 +1,4 @@
-# Debuger IPC Protocol
+# Debugger IPC Protocol
 
 Internal protocol for communication between the CLI client and the dev server bridge.
 
@@ -10,8 +10,8 @@ Messages are sent as **newline-delimited JSON (NDJSON)** over a local socket.
 
 | Platform | Path |
 |----------|------|
-| Unix/macOS | `<project-root>/.debuger/bridge.sock` |
-| Windows | `\\.\pipe\debuger-<hash>` (hash derived from project root) |
+| Unix/macOS | `<project-root>/.debugger/bridge.sock` |
+| Windows | `\\.\pipe\debugger-<hash>` (hash derived from project root) |
 
 ## Message format
 

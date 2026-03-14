@@ -1,0 +1,49 @@
+{
+  "name": "@ephem-sh/debugger",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "dbg": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./nextjs": {
+      "edge-light": "./dist/adapters/nextjs/noop.js",
+      "types": "./dist/adapters/nextjs/index.d.ts",
+      "import": "./dist/adapters/nextjs/index.js"
+    },
+    "./nextjs/script": {
+      "edge-light": "./dist/adapters/nextjs/noop.js",
+      "types": "./dist/adapters/nextjs/script.d.ts",
+      "import": "./dist/adapters/nextjs/script.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && bun build src/browser/client.ts --outdir dist/browser --target browser --format iife",
+    "build:types": "tsc",
+    "build:browser": "bun build src/browser/client.ts --outdir dist/browser --target browser --format iife",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}

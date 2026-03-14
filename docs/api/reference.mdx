@@ -1,0 +1,183 @@
+---
+title: CLI reference
+description: Complete reference for the dbg CLI commands and flags.
+order: 4
+---
+
+# CLI reference
+
+The `dbg` CLI queries a running debugger session over IPC. It connects
+to the dev server's log store via Unix sockets (macOS/Linux) or
+Windows named pipes.
+
+## Usage
+
+```
+dbg <scope> <command> [flags]
+dbg <command> [flags]
+```
+
+## Scopes
+
+### `browser`
+
+Query browser-side data. All browser commands filter entries where
+`source` is `browser`.
+
+| Command | Description |
+|---------|-------------|
+| `dbg browser console` | Console logs (log, warn, error, debug, info) |
+| `dbg browser errors` | Runtime errors and unhandled rejections |
+| `dbg browser network` | Network requests (fetch, XHR, WebSocket) |
+| `dbg browser cookies` | Document cookies |
+| `dbg browser storage` | localStorage and sessionStorage |
+| `dbg browser workers` | Service worker registrations |
+| `dbg browser cache` | Cache Storage names and entry counts |
+| `dbg browser permissions` | Browser permission states |
+| `dbg browser quota` | Storage usage and quota |
+
+### `server`
+
+Query server-side data. All server commands filter entries where
+`source` is `server`.
+
+| Command | Description |
+|---------|-------------|
+| `dbg server console` | Server console logs |
+| `dbg server errors` | SSR and runtime errors |
+
+## Top-level commands
+
+| Command | Description |
+|---------|-------------|
+| `dbg status` | Display session metadata (ID, framework, port, uptime) |
+| `dbg all` | Display all entries merged by timestamp (default) |
+
+## Flags
+
+All flags are optional and can be combined with any command.
+
+### Output
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output as JSON instead of formatted text |
+| `--limit <n>` | Maximum number of entries to return (default: 50) |
+
+### Filtering
+
+| Flag | Description |
+|------|-------------|
+| `--last <duration>` | Time window filter. Accepts `30s`, `5m`, `1h` |
+| `--level <level>` | Filter console entries by level (`log`, `warn`, `error`, `debug`, `info`) |
+| `--status <code>` | Filter network entries by HTTP status code |
+| `--failed` | Show only failed network requests |
+
+### Detail view
+
+| Flag | Description |
+|------|-------------|
+| `--id <id>` | Show detail view for a single entry |
+| `--ids <id1> <id2>` | Show detail view for multiple entries |
+| `--headers` | Include request/response headers in network detail |
+| `--body` | Include response body in network detail |
+
+### Application state filters
+
+| Flag | Description |
+|------|-------------|
+| `--name <name>` | Filter cookies by name |
+| `--key <key>` | Filter storage entries by key |
+| `--type <type>` | Filter storage by type (`local` or `session`) |
+
+### Other
+
+| Flag | Description |
+|------|-------------|
+| `--cwd <path>` | Override working directory for session discovery |
+| `--help` | Display help text |
+
+## Examples
+
+View the last 30 seconds of browser console warnings:
+
+```bash
+dbg browser console --level warn --last 30s
+```
+
+Get failed network requests as JSON:
+
+```bash
+dbg browser network --failed --json
+```
+
+Inspect a specific network request with headers:
+
+```bash
+dbg browser network --id a1b2c3 --headers --body
+```
+
+Find a specific cookie:
+
+```bash
+dbg browser cookies --name session_token
+```
+
+View only localStorage:
+
+```bash
+dbg browser storage --type local
+```
+
+Look up a specific storage key:
+
+```bash
+dbg browser storage --key user_preferences
+```
+
+Get everything from the last 5 minutes as JSON:
+
+```bash
+dbg all --last 5m --json
+```
+
+## Session discovery
+
+The CLI finds the active session by walking parent directories from
+the current working directory:
+
+- **macOS/Linux:** looks for `.debugger/bridge.sock`
+- **Windows:** probes named pipes matching `\\.\pipe\debugger-<hash>`
+  where `<hash>` is derived from the directory path
+
+If your dev server runs in a subdirectory, use `--cwd` to point to it:
+
+```bash
+dbg status --cwd ./apps/web
+```
+
+## JSON output
+
+When using `--json`, the CLI outputs structured JSON that AI agents
+can parse directly:
+
+```bash
+dbg browser console --json --limit 5
+```
+
+```json
+[
+  {
+    "type": "console",
+    "level": "log",
+    "args": ["User clicked button"],
+    "timestamp": 1710000000000,
+    "source": "browser",
+    "browser": "Chrome",
+    "id": "a1b2c3"
+  }
+]
+```
+
+The `browser` field identifies which browser generated the entry
+(Chrome, Edge, Brave, Firefox, Safari, Arc, and 40+ others).

@@ -1,0 +1,98 @@
+---
+title: Getting started
+description: Install and set up debugger in your project.
+order: 2
+---
+
+# Getting started
+
+Get debugger running in your project in under two minutes. This guide
+covers installation and basic usage. For framework-specific setup, see
+the [Next.js guide](/examples/nextjs).
+
+## Install
+
+Add `@ephem-sh/debugger` as a dev dependency:
+
+```bash
+# npm
+npm install -D @ephem-sh/debugger
+
+# pnpm
+pnpm add -D @ephem-sh/debugger
+
+# bun
+bun add -D @ephem-sh/debugger
+
+# yarn
+yarn add -D @ephem-sh/debugger
+```
+
+## Framework setup
+
+debugger uses framework-specific adapters to wire into your dev server.
+Each adapter handles server instrumentation and browser script injection.
+
+| Framework | Adapter | Status |
+|-----------|---------|--------|
+| Next.js (App Router) | `@ephem-sh/debugger/nextjs` | Available |
+| Vite | Coming soon | Planned |
+| Remix | Coming soon | Planned |
+
+See the [Next.js guide](/examples/nextjs) for full setup instructions.
+
+## Use the CLI
+
+Once your dev server is running with debugger instrumented, query it
+with `dbg`:
+
+```bash
+# Check session status
+npx dbg status
+
+# View browser console logs
+npx dbg browser console
+
+# View server console logs
+npx dbg server console
+
+# View everything
+npx dbg all
+
+# JSON output for agents
+npx dbg browser console --json
+```
+
+With bun:
+
+```bash
+bunx dbg status
+bunx dbg browser console
+```
+
+## CLI overview
+
+The CLI uses a two-level command structure split by where the data
+comes from:
+
+```
+dbg <scope> <command> [flags]
+dbg <command> [flags]
+```
+
+**Scopes:**
+- `browser` — browser-side data (console, network, errors, cookies,
+  storage, workers, cache, permissions, quota)
+- `server` — server-side data (console, errors)
+
+**Top-level commands:**
+- `status` — session info
+- `all` — everything merged (default)
+
+Run `npx dbg --help` for the full command and flag reference.
+
+## Next steps
+
+- [Next.js setup guide](/examples/nextjs) — full walkthrough for
+  App Router projects
+- [CLI reference](/api/reference) — all commands, flags, and examples
