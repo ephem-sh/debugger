@@ -1,0 +1,141 @@
+---
+title: Go + Chi
+description: Set up debugger in a Go project using the Chi router.
+order: 16
+---
+
+# Go + Chi
+
+This guide covers adding debugger to a Go API using the
+[Chi](https://github.com/go-chi/chi) router. The setup takes three
+lines of code.
+
+## Prerequisites
+
+- Go 1.21 or later
+
+## Install
+
+Add the debugger module to your project:
+
+```bash
+go get github.com/ephem-sh/debugger/packages/debugger-go
+```
+
+## Set up
+
+Import the Chi middleware package and add it to your router:
+
+```go
+package main
+
+import (
+    "encoding/json"
+    "net/http"
+
+    "github.com/go-chi/chi/v5"
+    dbg "github.com/ephem-sh/debugger/packages/debugger-go/middleware/chi"
+)
+
+func main() {
+    defer dbg.Close()
+    log := dbg.Logger()
+
+    r := chi.NewRouter()
+    r.Use(dbg.Middleware(9878))
+
+    r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+        log.Info("home page hit")
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(map[string]any{"status": "ok"})
+    })
+
+    http.ListenAndServe(":9878", r)
+}
+```
+
+Three lines handle all debugger setup:
+
+1. `defer dbg.Close()` — clean up the IPC bridge on exit
+2. `log := dbg.Logger()` — get a `*slog.Logger` that writes to both
+   stdout and the debugger store
+3. `r.Use(dbg.Middleware(9878))` — capture HTTP requests and start
+   the session
+
+## stdlib compatible
+
+Chi uses standard `net/http` middleware (`func(http.Handler)
+http.Handler`). The debugger middleware wraps the `ResponseWriter`
+to capture the status code, then delegates to the next handler.
+This means the middleware also works with Gorilla Mux, the stdlib
+`ServeMux`, or any other `net/http` compatible router.
+
+## What gets captured
+
+The middleware and logger capture two categories of data:
+
+- **HTTP requests** — method, path, status code, and latency for
+  every request. Captured after `next.ServeHTTP` returns.
+- **slog calls** — any `log.Info()`, `log.Error()`, `log.Warn()`, or
+  `log.Debug()` call in your handlers. Captured via the logger
+  returned by `dbg.Logger()`.
+
+## Verify
+
+Start your server:
+
+```bash
+go run .
+```
+
+The terminal shows the session ID:
+
+```
+> @ephem-sh/debugger: session 6c923b
+```
+
+Open another terminal and query:
+
+```bash
+dbg status
+dbg server console
+```
+
+## API reference
+
+The `chi` middleware package exports three functions:
+
+### `Middleware(port int) func(http.Handler) http.Handler`
+
+Returns a standard `net/http` middleware that creates the debugger
+session, starts the IPC bridge, and captures every HTTP request. The
+`port` parameter is metadata only.
+
+If the debugger fails to start, `Middleware` prints a warning to
+stderr and returns a passthrough handler.
+
+### `Logger() *slog.Logger`
+
+Returns a `*slog.Logger` that writes to both `os.Stdout` and the
+debugger store. Safe to call before or after `Middleware()`.
+
+### `Close()`
+
+Stops the IPC bridge and cleans up resources.
+
+## Production safety
+
+The debugger middleware runs unconditionally. Guard it with an
+environment variable for production:
+
+```go
+r := chi.NewRouter()
+if os.Getenv("DEBUG") == "1" {
+    r.Use(dbg.Middleware(9878))
+}
+```
+
+## Full example
+
+See the complete working example at
+[examples/go/chi](https://github.com/ephem-sh/debugger/tree/main/examples/go/chi).
