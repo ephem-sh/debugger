@@ -1,0 +1,19 @@
+[project]
+name = "ephem-debugger"
+version = "0.1.0"
+description = "Dev-only observability for AI agent debugging"
+readme = "README.md"
+authors = [
+    { name = "ephem-sh" }
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+fastapi = ["fastapi>=0.100.0", "starlette>=0.27.0"]
+django = ["django>=4.2"]
+flask = ["flask>=2.3"]
+
+[build-system]
+requires = ["uv_build>=0.10.10,<0.11.0"]
+build-backend = "uv_build"

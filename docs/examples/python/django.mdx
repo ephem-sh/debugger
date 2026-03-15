@@ -1,0 +1,88 @@
+---
+title: Python + Django
+description: Set up debugger in a Django project.
+order: 19
+---
+
+# Python + Django
+
+This guide covers adding debugger to a
+[Django](https://djangoproject.com) project. The setup takes one
+line in your settings file.
+
+## Prerequisites
+
+- Python 3.10 or later
+- Django 4.2 or later
+
+## Install
+
+```bash
+pip install ephem-debugger[django]
+```
+
+Or with uv:
+
+```bash
+uv add ephem-debugger[django]
+```
+
+## Set up
+
+Add the middleware to your Django settings:
+
+```python
+# settings.py
+MIDDLEWARE = [
+    "ephem_debugger.middleware.django.DebuggerMiddleware",
+    # ... other middleware
+]
+
+# Optional: set the port (defaults to 8000)
+DEBUGGER_PORT = 8000
+```
+
+One line in `MIDDLEWARE` handles everything — log store, IPC bridge,
+console capture, and HTTP request logging.
+
+## What gets captured
+
+- **HTTP requests** — method, path, status code, and latency for
+  every request
+- **Root logger output** — the debugger handler is added to the root
+  Python logger, capturing all `logging.info()`, `logging.error()`,
+  etc. calls throughout your Django app
+
+## Verify
+
+Start your server:
+
+```bash
+python manage.py runserver
+```
+
+Open another terminal and query:
+
+```bash
+dbg status
+dbg server console
+```
+
+## Production safety
+
+Django only runs the middleware when it's in the `MIDDLEWARE` list.
+Guard it for production:
+
+```python
+# settings.py
+MIDDLEWARE = [...]
+
+import os
+if os.getenv("DEBUG") == "1":
+    MIDDLEWARE.insert(0, "ephem_debugger.middleware.django.DebuggerMiddleware")
+```
+
+## Full example
+
+See the complete working example at
+[examples/python/django](https://github.com/ephem-sh/debugger/tree/main/examples/python/django).

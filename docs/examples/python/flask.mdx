@@ -1,0 +1,95 @@
+---
+title: Python + Flask
+description: Set up debugger in a Flask project.
+order: 18
+---
+
+# Python + Flask
+
+This guide covers adding debugger to a Python app using
+[Flask](https://flask.palletsprojects.com). The setup takes two
+lines.
+
+## Prerequisites
+
+- Python 3.10 or later
+
+## Install
+
+```bash
+pip install ephem-debugger[flask]
+```
+
+Or with uv:
+
+```bash
+uv add ephem-debugger[flask]
+```
+
+## Set up
+
+Initialize debugger on your Flask app:
+
+```python
+from flask import Flask
+from ephem_debugger.middleware.flask import init_debugger, logger, close
+
+app = Flask(__name__)
+init_debugger(app, port=5000)
+log = logger()
+
+@app.route("/")
+def index():
+    log.info("home page hit")
+    return {"status": "ok"}
+
+if __name__ == "__main__":
+    try:
+        app.run(port=5000, debug=True)
+    finally:
+        close()
+```
+
+Two lines handle debugger setup:
+
+1. `init_debugger(app, port=5000)` — capture HTTP requests and start
+   the session
+2. `log = logger()` — get a logger that writes to both stderr and the
+   debugger store
+
+## What gets captured
+
+- **HTTP requests** — method, path, status code, and latency
+- **Logging calls** — any `log.info()`, `log.error()` call
+- **Unhandled exceptions** — captured via Flask's `teardown_request`
+  hook, which runs even when exceptions occur
+
+## Verify
+
+Start your server:
+
+```bash
+flask run
+```
+
+Open another terminal and query:
+
+```bash
+dbg status
+dbg server console
+```
+
+## Production safety
+
+Guard the middleware for production:
+
+```python
+import os
+if os.getenv("DEBUG") == "1":
+    init_debugger(app, port=5000)
+```
+
+## Full example
+
+See the complete working example at
+[examples/python/flask](https://github.com/ephem-sh/debugger/tree/main/examples/python/flask).

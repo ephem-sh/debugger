@@ -55,6 +55,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+uv.lock
+db.sqlite3
 
 # Framework caches
 .next/

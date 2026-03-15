@@ -35,17 +35,26 @@ Each adapter handles server instrumentation and browser script injection.
 
 | Framework | Adapter | Guide |
 |-----------|---------|-------|
-| Next.js (App Router) | `@ephem-sh/debugger/nextjs` | [Guide](/examples/nextjs) |
-| React + Vite | `@ephem-sh/debugger/vite` | [Guide](/examples/vite-react) |
-| Vue + Vite | `@ephem-sh/debugger/vite` | [Guide](/examples/vite-vue) |
-| SvelteKit | `@ephem-sh/debugger/vite` + `vite/sveltekit` | [Guide](/examples/sveltekit) |
-| React Router v7 | `@ephem-sh/debugger/vite` + `vite/react-router` | [Guide](/examples/react-router) |
-| Astro | `@ephem-sh/debugger/vite` + `vite/astro` | [Guide](/examples/astro) |
-| Nuxt | `@ephem-sh/debugger/vite` + `nitro` | [Guide](/examples/nuxt) |
-| Qwik | `@ephem-sh/debugger/vite` | [Guide](/examples/qwik) |
-| TanStack Start | `@ephem-sh/debugger/vite` + `vite/tanstack-start` | [Guide](/examples/tanstack-start) |
-| Waku | `@ephem-sh/debugger/vite` | [Guide](/examples/waku) |
-| Angular | `@ephem-sh/debugger/angular` | [Guide](/examples/angular) |
+| **Node.js** | | |
+| Next.js (App Router) | `@ephem-sh/debugger/nextjs` | [Guide](/examples/node/nextjs) |
+| React + Vite | `@ephem-sh/debugger/vite` | [Guide](/examples/node/vite-react) |
+| Vue + Vite | `@ephem-sh/debugger/vite` | [Guide](/examples/node/vite-vue) |
+| SvelteKit | `@ephem-sh/debugger/vite` + `vite/sveltekit` | [Guide](/examples/node/sveltekit) |
+| React Router v7 | `@ephem-sh/debugger/vite` + `vite/react-router` | [Guide](/examples/node/react-router) |
+| Astro | `@ephem-sh/debugger/vite` + `vite/astro` | [Guide](/examples/node/astro) |
+| Nuxt | `@ephem-sh/debugger/vite` + `nitro` | [Guide](/examples/node/nuxt) |
+| Qwik | `@ephem-sh/debugger/vite` | [Guide](/examples/node/qwik) |
+| TanStack Start | `@ephem-sh/debugger/vite` + `vite/tanstack-start` | [Guide](/examples/node/tanstack-start) |
+| Waku | `@ephem-sh/debugger/vite` | [Guide](/examples/node/waku) |
+| Angular | `@ephem-sh/debugger/angular` | [Guide](/examples/node/angular) |
+| **Go** | | |
+| Gin | `middleware/gin` | [Guide](/examples/go/gin) |
+| Echo | `middleware/echo` | [Guide](/examples/go/echo) |
+| Chi | `middleware/chi` | [Guide](/examples/go/chi) |
+| **Python** | | |
+| FastAPI | `ephem_debugger.middleware.fastapi` | [Guide](/examples/python/fastapi) |
+| Flask | `ephem_debugger.middleware.flask` | [Guide](/examples/python/flask) |
+| Django | `ephem_debugger.middleware.django` | [Guide](/examples/python/django) |
 
 ## Use the CLI
 
@@ -100,14 +109,20 @@ Run `npx dbg --help` for the full command and flag reference.
 ## Next steps
 
 - [CLI reference](/api/reference) — all commands, flags, and examples
-- Framework guides: [Next.js](/examples/nextjs),
-  [React + Vite](/examples/vite-react),
-  [Vue](/examples/vite-vue),
-  [SvelteKit](/examples/sveltekit),
-  [React Router](/examples/react-router),
-  [Astro](/examples/astro),
-  [Nuxt](/examples/nuxt),
-  [Qwik](/examples/qwik),
-  [TanStack Start](/examples/tanstack-start),
-  [Waku](/examples/waku),
-  [Angular](/examples/angular)
+- **Node.js:** [Next.js](/examples/node/nextjs),
+  [React + Vite](/examples/node/vite-react),
+  [Vue](/examples/node/vite-vue),
+  [SvelteKit](/examples/node/sveltekit),
+  [React Router](/examples/node/react-router),
+  [Astro](/examples/node/astro),
+  [Nuxt](/examples/node/nuxt),
+  [Qwik](/examples/node/qwik),
+  [TanStack Start](/examples/node/tanstack-start),
+  [Waku](/examples/node/waku),
+  [Angular](/examples/node/angular)
+- **Go:** [Gin](/examples/go/gin),
+  [Echo](/examples/go/echo),
+  [Chi](/examples/go/chi)
+- **Python:** [FastAPI](/examples/python/fastapi),
+  [Flask](/examples/python/flask),
+  [Django](/examples/python/django)

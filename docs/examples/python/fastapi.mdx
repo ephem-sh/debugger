@@ -1,0 +1,92 @@
+---
+title: Python + FastAPI
+description: Set up debugger in a FastAPI project.
+order: 17
+---
+
+# Python + FastAPI
+
+This guide covers adding debugger to a Python API using
+[FastAPI](https://fastapi.tiangolo.com). The setup takes two lines.
+
+## Prerequisites
+
+- Python 3.10 or later
+
+## Install
+
+```bash
+pip install ephem-debugger[fastapi]
+```
+
+Or with uv:
+
+```bash
+uv add ephem-debugger[fastapi]
+```
+
+## Set up
+
+Add the middleware to your FastAPI app:
+
+```python
+from fastapi import FastAPI
+from ephem_debugger.middleware.fastapi import Middleware, logger, close
+
+app = FastAPI()
+app.add_middleware(Middleware, port=8000)
+log = logger()
+
+@app.get("/")
+async def root():
+    log.info("home page hit")
+    return {"status": "ok"}
+
+@app.on_event("shutdown")
+async def shutdown():
+    close()
+```
+
+Two lines handle debugger setup:
+
+1. `app.add_middleware(Middleware, port=8000)` — capture HTTP requests
+   and start the session
+2. `log = logger()` — get a logger that writes to both stderr and the
+   debugger store
+
+## What gets captured
+
+- **HTTP requests** — method, path, status code, and latency for
+  every request
+- **Logging calls** — any `log.info()`, `log.error()`, `log.warning()`
+  call in your handlers
+
+## Verify
+
+Start your server:
+
+```bash
+uvicorn app:app --reload
+```
+
+Open another terminal and query:
+
+```bash
+dbg status
+dbg server console
+```
+
+## Production safety
+
+The middleware runs unconditionally. Guard it for production:
+
+```python
+import os
+if os.getenv("DEBUG") == "1":
+    app.add_middleware(Middleware, port=8000)
+```
+
+## Full example
+
+See the complete working example at
+[examples/python/fastapi](https://github.com/ephem-sh/debugger/tree/main/examples/python/fastapi).
