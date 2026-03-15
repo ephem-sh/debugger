@@ -35,6 +35,35 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .claude
 todo.md
 
-# debuger runtime
-.debuger/
+# debugger runtime
+.debugger/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Rust
+target/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Framework caches
+.next/
+.nuxt/
+.output/
+.svelte-kit/
+.react-router/
+.angular/
+.waku/
+.vite/
+
 CLAUDE.md

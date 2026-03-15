@@ -15,7 +15,7 @@ export async function query(request: QueryRequest, cwd?: string): Promise<QueryR
   const socketPath = await resolveSocketPath(cwd)
 
   return new Promise((resolve, reject) => {
-    const socket = net.createConnection(socketPath, () => {
+    const socket = net.createConnection(parseSocketTarget(socketPath), () => {
       socket.write(JSON.stringify(request) + '\n')
     })
 
@@ -52,7 +52,7 @@ function probeSocket(socketPath: string): Promise<boolean> {
       resolve(false)
     }, 500)
 
-    const socket = net.createConnection(socketPath, () => {
+    const socket = net.createConnection(parseSocketTarget(socketPath), () => {
       clearTimeout(timeout)
       socket.destroy()
       resolve(true)
@@ -63,6 +63,18 @@ function probeSocket(socketPath: string): Promise<boolean> {
       resolve(false)
     })
   })
+}
+
+/**
+ * Parse a socket target string into net.createConnection options.
+ * Handles both Unix socket paths and TCP "host:port" addresses.
+ */
+function parseSocketTarget(target: string): net.NetConnectOpts {
+  const tcpMatch = target.match(/^(\d+\.\d+\.\d+\.\d+):(\d+)$/)
+  if (tcpMatch) {
+    return { host: tcpMatch[1], port: parseInt(tcpMatch[2], 10) }
+  }
+  return { path: target }
 }
 
 /**
@@ -107,11 +119,22 @@ function resolveUnixSocket(startDir: string): string {
 async function resolveWindowsPipe(startDir: string): Promise<string> {
   let dir = startDir
   while (true) {
+    // Try named pipe first (Node.js bridge)
     const hash = createHash('md5').update(dir).digest('hex').slice(0, 8)
     const pipePath = `\\\\.\\pipe\\debugger-${hash}`
 
     const alive = await probeSocket(pipePath)
     if (alive) return pipePath
+
+    // Try TCP addr file fallback (Go bridge)
+    const addrFile = path.join(dir, '.debugger', 'bridge.addr')
+    if (fs.existsSync(addrFile)) {
+      const addr = fs.readFileSync(addrFile, 'utf-8').trim()
+      if (addr) {
+        const tcpAlive = await probeSocket(addr)
+        if (tcpAlive) return addr
+      }
+    }
 
     const parent = path.dirname(dir)
     if (parent === dir) break
