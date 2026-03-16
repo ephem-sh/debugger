@@ -1,0 +1,66 @@
+---
+title: Rust + Poem
+description: Set up debugger in a Rust project using the Poem framework.
+order: 23
+---
+
+# Rust + Poem
+
+This guide covers adding debugger to a Rust API using
+[Poem](https://docs.rs/poem).
+
+## Prerequisites
+
+- Rust 1.75 or later
+
+## Install
+
+Add the crate to your `Cargo.toml`:
+
+```toml
+[dependencies]
+ephem-debugger = { version = "0.1", features = ["poem"] }
+```
+
+## Set up
+
+```rust
+use poem::{Route, Server, get, handler, listener::TcpListener};
+use ephem_debugger::poem_middleware;
+use tracing_subscriber::prelude::*;
+
+#[handler]
+fn index() -> &'static str { "hello" }
+
+#[tokio::main]
+async fn main() {
+    let (middleware, capture_layer) = poem_middleware::layers(3000);
+
+    tracing_subscriber::registry()
+        .with(capture_layer)
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    let app = Route::new()
+        .at("/", get(index))
+        .with(middleware);
+
+    Server::new(TcpListener::bind("0.0.0.0:3000"))
+        .run(app)
+        .await
+        .unwrap();
+}
+```
+
+## Verify
+
+```bash
+cargo run
+dbg status
+dbg server console
+```
+
+## Full example
+
+See the complete working example at
+[examples/rust/poem](https://github.com/ephem-sh/debugger/tree/main/examples/rust/poem).

@@ -1,0 +1,64 @@
+---
+title: Rust + Rocket
+description: Set up debugger in a Rust project using the Rocket framework.
+order: 22
+---
+
+# Rust + Rocket
+
+This guide covers adding debugger to a Rust API using
+[Rocket](https://rocket.rs).
+
+## Prerequisites
+
+- Rust 1.75 or later
+
+## Install
+
+Add the crate to your `Cargo.toml`:
+
+```toml
+[dependencies]
+ephem-debugger = { version = "0.1", features = ["rocket"] }
+```
+
+## Set up
+
+```rust
+use ephem_debugger::rocket_middleware;
+use tracing_subscriber::prelude::*;
+
+#[rocket::main]
+async fn main() -> Result<(), rocket::Error> {
+    let (fairing, capture_layer) = rocket_middleware::layers(8000);
+
+    tracing_subscriber::registry()
+        .with(capture_layer)
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    rocket::build()
+        .attach(fairing)
+        .mount("/", routes![index, users])
+        .launch()
+        .await?;
+    Ok(())
+}
+```
+
+The fairing hooks into `on_liftoff` (starts the IPC bridge),
+`on_request` (records start time), and `on_response` (captures
+method, path, status, duration).
+
+## Verify
+
+```bash
+cargo run
+dbg status
+dbg server console
+```
+
+## Full example
+
+See the complete working example at
+[examples/rust/rocket](https://github.com/ephem-sh/debugger/tree/main/examples/rust/rocket).

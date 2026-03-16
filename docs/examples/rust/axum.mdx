@@ -1,0 +1,133 @@
+---
+title: Rust + Axum
+description: Set up debugger in a Rust project using the Axum framework.
+order: 20
+---
+
+# Rust + Axum
+
+This guide covers adding debugger to a Rust API using
+[Axum](https://docs.rs/axum). The setup takes three lines.
+
+## Prerequisites
+
+- Rust 1.75 or later
+
+## Install
+
+Add the crate to your `Cargo.toml`:
+
+```toml
+[dependencies]
+ephem-debugger = { version = "0.1", features = ["axum"] }
+```
+
+## Set up
+
+Use the `layers` convenience function to get both the HTTP middleware
+and tracing capture layer:
+
+```rust
+use axum::{routing::get, Json, Router};
+use ephem_debugger::axum_middleware;
+use serde_json::{json, Value};
+use tracing_subscriber::prelude::*;
+
+async fn index() -> Json<Value> {
+    tracing::info!("home page hit");
+    Json(json!({"status": "ok"}))
+}
+
+#[tokio::main]
+async fn main() {
+    let (middleware_layer, capture_layer) = axum_middleware::layers(3000);
+
+    tracing_subscriber::registry()
+        .with(capture_layer)
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    let app = Router::new()
+        .route("/", get(index))
+        .layer(middleware_layer);
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
+        .await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+```
+
+Three lines handle debugger setup:
+
+1. `axum_middleware::layers(3000)` — creates the session, store,
+   IPC bridge, and returns both layers
+2. `.with(capture_layer)` — captures all `tracing` events into the
+   debugger store
+3. `.layer(middleware_layer)` — captures HTTP request metadata
+
+## What gets captured
+
+- **HTTP requests** — method, path, status code, and duration for
+  every request via the Tower middleware layer
+- **tracing events** — all `tracing::info!()`, `tracing::error!()`,
+  etc. calls via the capture layer, including structured fields
+- **Axum internals** — connection events at DEBUG/TRACE level
+
+## Verify
+
+Build and run:
+
+```bash
+cargo run
+```
+
+The terminal shows the session ID:
+
+```
+> @ephem-sh/debugger: session ba2f3c
+> @ephem-sh/debugger: bridge listening on 127.0.0.1:60693
+```
+
+Open another terminal and query:
+
+```bash
+dbg status
+dbg server console
+```
+
+## API reference
+
+### `axum_middleware::layers(port) -> (DebuggerLayer, CaptureLayer)`
+
+Returns a tuple of two layers:
+- `DebuggerLayer` — Tower `Layer` for HTTP request capture
+- `CaptureLayer` — `tracing_subscriber::Layer` for log capture
+
+Add the `DebuggerLayer` to your Axum `Router` with `.layer()` and
+the `CaptureLayer` to your `tracing_subscriber::registry()` with
+`.with()`.
+
+### `DebuggerLayer::new(port) -> DebuggerLayer`
+
+Creates just the HTTP middleware layer (without tracing capture).
+Use this if you want to set up tracing separately.
+
+## Production safety
+
+The middleware runs unconditionally. Guard it with a feature flag
+or environment variable:
+
+```rust
+let app = if std::env::var("DEBUG").is_ok() {
+    let (mw, cap) = axum_middleware::layers(3000);
+    // set up tracing with cap...
+    router.layer(mw)
+} else {
+    router
+};
+```
+
+## Full example
+
+See the complete working example at
+[examples/rust/axum](https://github.com/ephem-sh/debugger/tree/main/examples/rust/axum).

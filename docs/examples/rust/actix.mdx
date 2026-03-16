@@ -1,0 +1,63 @@
+---
+title: Rust + Actix-web
+description: Set up debugger in a Rust project using the Actix-web framework.
+order: 21
+---
+
+# Rust + Actix-web
+
+This guide covers adding debugger to a Rust API using
+[Actix-web](https://actix.rs).
+
+## Prerequisites
+
+- Rust 1.75 or later
+
+## Install
+
+Add the crate to your `Cargo.toml`:
+
+```toml
+[dependencies]
+ephem-debugger = { version = "0.1", features = ["actix"] }
+```
+
+## Set up
+
+```rust
+use actix_web::{web, App, HttpServer, middleware};
+use ephem_debugger::actix_middleware::{self, debugger_mw};
+use tracing_subscriber::prelude::*;
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    let capture_layer = actix_middleware::init(8080);
+
+    tracing_subscriber::registry()
+        .with(capture_layer)
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    HttpServer::new(|| {
+        App::new()
+            .wrap(middleware::from_fn(debugger_mw))
+            .route("/", web::get().to(handler))
+    })
+    .bind("0.0.0.0:8080")?
+    .run()
+    .await
+}
+```
+
+## Verify
+
+```bash
+cargo run
+dbg status
+dbg server console
+```
+
+## Full example
+
+See the complete working example at
+[examples/rust/actix](https://github.com/ephem-sh/debugger/tree/main/examples/rust/actix).

@@ -1,10 +1,11 @@
 # debugger
 
-Dev-only observability for AI agent debugging. One package, 11
+Dev-only observability for AI agent debugging. 4 languages, 21
 frameworks, zero production footprint.
 
-> **Note:** This is a preview feature currently under active
-> development.
+Agents when don't run the own servers don't have terminal context, to get information from browsers we often need MCP servers, and pasting information back to agents is a time consuming process. Debugger is aimed for you who don't want to run mcp servers and usually preferer running servers in separated terminals instead of bloating agent context with outputs, now agents can do all that and filter what they need to debug using proper filters.
+
+> **Note:** This is a preview feature currently under active development.
 
 ```bash
 npm install -D @ephem-sh/debugger
@@ -26,6 +27,8 @@ dbg all --json                # everything as JSON
 
 ## Supported frameworks
 
+### Node.js — `@ephem-sh/debugger`
+
 | Framework | Setup | Adapter |
 |-----------|-------|---------|
 | Next.js | 2 files | `@ephem-sh/debugger/nextjs` |
@@ -39,6 +42,31 @@ dbg all --json                # everything as JSON
 | TanStack Start | 3 files | `@ephem-sh/debugger/vite` + `/vite/tanstack-start` |
 | Waku | 1 file | `@ephem-sh/debugger/vite` |
 | Angular | 2 files | `@ephem-sh/debugger/angular` |
+
+### Go — `debugger-go`
+
+| Framework | Setup | Middleware |
+|-----------|-------|-----------|
+| Gin | 3 lines | `middleware/gin` |
+| Echo | 3 lines | `middleware/echo` |
+| Chi | 3 lines | `middleware/chi` |
+
+### Python — `ephem-debugger`
+
+| Framework | Setup | Middleware |
+|-----------|-------|-----------|
+| FastAPI | 2 lines | `ephem_debugger.middleware.fastapi` |
+| Flask | 2 lines | `ephem_debugger.middleware.flask` |
+| Django | 1 line | `ephem_debugger.middleware.django` |
+
+### Rust — `ephem-debugger`
+
+| Framework | Setup | Feature |
+|-----------|-------|---------|
+| Axum | 3 lines | `axum` |
+| Actix-web | 3 lines | `actix` |
+| Rocket | 3 lines | `rocket` |
+| Poem | 3 lines | `poem` |
 
 ## Quick start (Vite + React)
 
