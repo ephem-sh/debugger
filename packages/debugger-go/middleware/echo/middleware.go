@@ -30,6 +30,7 @@ import (
 	lecho "github.com/labstack/echo/v4"
 
 	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
+	"github.com/ephem-sh/debugger/packages/debugger-go/browser"
 	"github.com/ephem-sh/debugger/packages/debugger-go/capture"
 	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
 )
@@ -60,6 +61,9 @@ func Middleware(port int) lecho.MiddlewareFunc {
 
 	return func(next lecho.HandlerFunc) lecho.HandlerFunc {
 		return func(c lecho.Context) error {
+			if browser.HandleRoutes(c.Response().Writer, c.Request(), dbg.Store) {
+				return nil
+			}
 			start := time.Now()
 			err := next(c)
 			dbg.Store.Push(&protocol.ConsoleEntry{
@@ -113,6 +117,32 @@ func (h *lazyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 }
 func (h *lazyHandler) WithGroup(name string) slog.Handler {
 	return h.resolve().WithGroup(name)
+}
+
+// Routes registers debugger browser routes on an Echo instance.
+// Call after Middleware():
+//
+//	e.Use(dbg.Middleware(9877))
+//	dbg.Routes(e)
+func Routes(e *lecho.Echo) {
+	if instance == nil {
+		return
+	}
+	s := instance.Store
+
+	e.GET("/_/d.js", func(c lecho.Context) error {
+		return c.Blob(200, "application/javascript", []byte(browser.ClientScript))
+	})
+
+	e.POST("/_/d", func(c lecho.Context) error {
+		browser.HandleRoutes(c.Response().Writer, c.Request(), s)
+		return nil
+	})
+
+	e.OPTIONS("/_/d", func(c lecho.Context) error {
+		browser.HandleRoutes(c.Response().Writer, c.Request(), s)
+		return nil
+	})
 }
 
 // Close stops the debugger. Call this in a defer after setting up

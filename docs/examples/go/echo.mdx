@@ -130,6 +130,43 @@ if os.Getenv("DEBUG") == "1" {
 }
 ```
 
+## Browser support
+
+If your application serves HTML pages, the debugger can also capture
+browser-side data (console logs, errors, network requests, cookies,
+and storage).
+
+### 1. Register browser routes
+
+After setting up the middleware, register the browser endpoints:
+
+```go
+dbg.Routes(e)  // e is your echo.Echo
+```
+
+This registers `GET /_/d.js` (browser script) and `POST /_/d`
+(browser log ingest).
+
+### 2. Add script tags to your HTML
+
+Include these two script tags before `</body>` in your HTML
+templates:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+### 3. Query browser data
+
+```bash
+dbg browser console       # browser console logs
+dbg browser errors        # runtime errors
+dbg browser network       # fetch/XHR requests
+dbg browser cookies       # document cookies
+dbg browser storage       # localStorage + sessionStorage
+```
+
 ## Full example
 
 See the complete working example at

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
+	"github.com/ephem-sh/debugger/packages/debugger-go/browser"
 	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
 )
 
@@ -20,6 +21,9 @@ import (
 func Middleware(dbg *debugger.Debugger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if browser.HandleRoutes(w, r, dbg.Store) {
+				return
+			}
 			start := time.Now()
 
 			// Wrap response writer to capture status code.

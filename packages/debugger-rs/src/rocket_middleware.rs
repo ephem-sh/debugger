@@ -1,6 +1,6 @@
 //! Rocket fairing for the debugger.
 //!
-//! Provides a [`Fairing`](rocket::fairing::Fairing) implementation that
+//! Provides a [`Fairing`] implementation that
 //! captures every HTTP request as a console entry in the debugger store, and
 //! starts the IPC bridge so the `dbg` CLI can connect.
 //!
@@ -23,16 +23,21 @@
 //!     .await?;
 //! ```
 
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Instant;
 
 use rocket::fairing::{Fairing, Info, Kind};
-use rocket::{Data, Request, Response};
+use rocket::http::{ContentType, Status};
+use rocket::{Data, Request, Response, Route};
 
 use crate::bridge::Bridge;
+use crate::browser;
 use crate::capture::CaptureLayer as TracingCaptureLayer;
 use crate::protocol;
 use crate::store::LogStore;
+
+/// Module-level store so the browser route handlers can access it.
+static ROCKET_STORE: OnceLock<Arc<LogStore>> = OnceLock::new();
 
 /// Rocket [`Fairing`] that instruments an application with debugger
 /// observability.
@@ -55,6 +60,8 @@ impl DebuggerFairing {
         let store = Arc::new(LogStore::new(session));
 
         eprintln!("> @ephem-sh/debugger: session {session_id}");
+
+        let _ = ROCKET_STORE.set(store.clone());
 
         Self {
             store,
@@ -133,10 +140,49 @@ impl Fairing for DebuggerFairing {
 ///
 /// rocket::build()
 ///     .attach(fairing)
+///     .mount("/", rocket_middleware::browser_routes())
 ///     .mount("/", routes![index])
 /// ```
 pub fn layers(port: i32) -> (DebuggerFairing, TracingCaptureLayer) {
     let fairing = DebuggerFairing::new(port);
     let tracing = fairing.tracing_layer();
     (fairing, tracing)
+}
+
+/// Return Rocket routes for browser support.
+///
+/// Mount these on `"/"` to enable the browser IIFE script and ingest
+/// endpoint:
+///
+/// ```rust,ignore
+/// use ephem_debugger::rocket_middleware;
+///
+/// rocket::build()
+///     .mount("/", rocket_middleware::browser_routes())
+/// ```
+pub fn browser_routes() -> Vec<Route> {
+    rocket::routes![browser_script, browser_ingest, browser_cors]
+}
+
+/// Serve the browser IIFE script at `GET /_/d.js`.
+#[rocket::get("/_/d.js")]
+fn browser_script() -> (ContentType, &'static str) {
+    (ContentType::JavaScript, browser::CLIENT_SCRIPT)
+}
+
+/// Ingest browser entries at `POST /_/d`.
+#[rocket::post("/_/d", data = "<body>")]
+fn browser_ingest(body: &[u8]) -> Status {
+    if let Some(store) = ROCKET_STORE.get()
+        && let Ok(entries) = serde_json::from_slice::<Vec<serde_json::Value>>(body)
+    {
+        browser::ingest_entries(store, &entries);
+    }
+    Status::NoContent
+}
+
+/// CORS preflight at `OPTIONS /_/d`.
+#[rocket::options("/_/d")]
+fn browser_cors() -> Status {
+    Status::NoContent
 }

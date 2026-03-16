@@ -1,6 +1,6 @@
 //! Poem middleware for the debugger.
 //!
-//! Provides a [`Middleware`](poem::Middleware) implementation that captures
+//! Provides a [`Middleware`] implementation that captures
 //! every HTTP request as a console entry in the debugger store, and starts
 //! the IPC bridge so the `dbg` CLI can connect.
 //!
@@ -29,9 +29,11 @@
 use std::sync::Arc;
 use std::time::Instant;
 
+use poem::http::Method;
 use poem::{Endpoint, IntoResponse, Middleware, Request, Response, Result};
 
 use crate::bridge::Bridge;
+use crate::browser;
 use crate::capture::CaptureLayer as TracingCaptureLayer;
 use crate::protocol;
 use crate::store::LogStore;
@@ -113,9 +115,45 @@ impl<E: Endpoint> Endpoint for DebuggerEndpoint<E> {
     type Output = Response;
 
     async fn call(&self, req: Request) -> Result<Self::Output> {
-        let start = Instant::now();
-        let method = req.method().to_string();
         let path = req.uri().path().to_string();
+        let method = req.method().clone();
+
+        // Serve browser IIFE script.
+        if path == "/_/d.js" && method == Method::GET {
+            let mut resp = Response::builder()
+                .header("content-type", "application/javascript")
+                .header("cache-control", "no-store");
+            for (k, v) in &browser::CORS_HEADERS {
+                resp = resp.header(*k, *v);
+            }
+            return Ok(resp.body(browser::CLIENT_SCRIPT));
+        }
+
+        // CORS preflight for the ingest endpoint.
+        if path == "/_/d" && method == Method::OPTIONS {
+            let mut resp = Response::builder().status(poem::http::StatusCode::NO_CONTENT);
+            for (k, v) in &browser::CORS_HEADERS {
+                resp = resp.header(*k, *v);
+            }
+            return Ok(resp.body(()));
+        }
+
+        // Browser ingest endpoint.
+        if path == "/_/d" && method == Method::POST {
+            let body_bytes = req.into_body().into_bytes().await.unwrap_or_default();
+            if let Ok(entries) = serde_json::from_slice::<Vec<serde_json::Value>>(&body_bytes) {
+                browser::ingest_entries(&self.store, &entries);
+            }
+            let mut resp = Response::builder().status(poem::http::StatusCode::NO_CONTENT);
+            for (k, v) in &browser::CORS_HEADERS {
+                resp = resp.header(*k, *v);
+            }
+            return Ok(resp.body(()));
+        }
+
+        // Normal request — forward to inner endpoint and capture metadata.
+        let method_str = method.to_string();
+        let start = Instant::now();
 
         let res = self.inner.call(req).await?.into_response();
 
@@ -125,7 +163,7 @@ impl<E: Endpoint> Endpoint for DebuggerEndpoint<E> {
         self.store.push_console(
             "info",
             vec![serde_json::json!(format!(
-                "{method} {path} {status} {duration}ms"
+                "{method_str} {path} {status} {duration}ms"
             ))],
             "server",
         );

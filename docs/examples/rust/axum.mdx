@@ -127,6 +127,26 @@ let app = if std::env::var("DEBUG").is_ok() {
 };
 ```
 
+## Browser support
+
+The middleware automatically handles `/_/d.js` and `/_/d` POST
+routes. To enable browser capture, add these script tags before
+`</body>` in your HTML templates:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+Query browser data with:
+
+```bash
+dbg browser console
+dbg browser errors
+dbg browser network
+dbg browser storage
+```
+
 ## Full example
 
 See the complete working example at

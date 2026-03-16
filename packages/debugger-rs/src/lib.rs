@@ -33,6 +33,7 @@
 //! ```
 
 pub mod bridge;
+pub mod browser;
 pub mod capture;
 pub mod protocol;
 pub mod store;

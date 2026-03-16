@@ -19,6 +19,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from .. import Debugger
+from ..browser import CLIENT_SCRIPT, inject_scripts
 from ..capture import DebuggerHandler
 
 _instance: Debugger | None = None
@@ -41,6 +42,48 @@ class _DebuggerMiddleware(BaseHTTPMiddleware):
     """Internal ASGI middleware — added by instrument()."""
 
     async def dispatch(self, request: Request, call_next: Any) -> Response:
+        path = request.url.path
+
+        # Browser script
+        if path == "/_/d.js" and request.method == "GET":
+            return Response(
+                content=CLIENT_SCRIPT,
+                media_type="application/javascript",
+                headers={"Cache-Control": "no-store"},
+            )
+
+        # CORS preflight
+        if path == "/_/d" and request.method == "OPTIONS":
+            origin = request.headers.get("origin", "*")
+            return Response(
+                status_code=204,
+                headers={
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Credentials": "true",
+                    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type",
+                },
+            )
+
+        # Browser ingest
+        if path == "/_/d" and request.method == "POST":
+            origin = request.headers.get("origin", "*")
+            try:
+                body = await request.json()
+                if isinstance(body, list) and _instance:
+                    for entry in body:
+                        _instance.store.push(entry)
+            except Exception:
+                pass
+            return Response(
+                status_code=204,
+                headers={
+                    "Access-Control-Allow-Origin": origin,
+                    "Access-Control-Allow-Credentials": "true",
+                },
+            )
+
+        # Normal request — capture timing
         start = time.time()
         response = await call_next(request)
         duration = int((time.time() - start) * 1000)
@@ -60,6 +103,26 @@ class _DebuggerMiddleware(BaseHTTPMiddleware):
                     "source": "server",
                 }
             )
+
+            # Inject browser scripts into HTML responses
+            content_type = response.headers.get("content-type", "")
+            if "text/html" in content_type:
+                body_bytes = b""
+                async for chunk in response.body_iterator:
+                    if isinstance(chunk, bytes):
+                        body_bytes += chunk
+                    else:
+                        body_bytes += chunk.encode("utf-8")
+                html = body_bytes.decode("utf-8", errors="replace")
+                html = inject_scripts(html)
+                headers = dict(response.headers)
+                headers.pop("content-length", None)
+                return Response(
+                    content=html,
+                    status_code=response.status_code,
+                    headers=headers,
+                    media_type="text/html",
+                )
 
         return response
 

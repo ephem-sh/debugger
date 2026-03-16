@@ -86,6 +86,25 @@ if os.getenv("DEBUG") == "1":
     app.add_middleware(Middleware, port=8000)
 ```
 
+## Browser support
+
+If your application serves HTML pages, the debugger automatically
+captures browser-side data. The middleware:
+
+- Serves the browser client script at `/_/d.js`
+- Handles browser log ingest at `POST /_/d`
+- Auto-injects script tags into HTML responses before `</body>`
+
+No additional setup is needed. Query browser data with:
+
+```bash
+dbg browser console       # browser console logs
+dbg browser errors        # runtime errors
+dbg browser network       # fetch/XHR requests
+dbg browser cookies       # document cookies
+dbg browser storage       # localStorage + sessionStorage
+```
+
 ## Full example
 
 See the complete working example at

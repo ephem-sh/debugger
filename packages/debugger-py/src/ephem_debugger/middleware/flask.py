@@ -2,7 +2,7 @@
 
 Usage::
 
-    from debugger_py.middleware.flask import init_debugger, logger, close
+    from ephem_debugger.middleware.flask import init_debugger, logger, close
 
     app = Flask(__name__)
     init_debugger(app, port=5000)
@@ -15,9 +15,11 @@ import time
 import traceback
 from typing import Any
 
+import flask
 from flask import Flask, g, request as flask_request
 
 from .. import Debugger
+from ..browser import CLIENT_SCRIPT, inject_scripts
 from ..capture import DebuggerHandler
 
 _instance: Debugger | None = None
@@ -35,6 +37,45 @@ def init_debugger(app: Flask, port: int = 5000) -> None:
     _instance = dbg
 
     print(f"> @ephem-sh/debugger: session {dbg.session.session_id}")
+
+    @app.route("/_/d.js", methods=["GET"])
+    def _serve_script() -> flask.Response:
+        return flask.Response(
+            CLIENT_SCRIPT,
+            content_type="application/javascript",
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.route("/_/d", methods=["POST"])
+    def _ingest() -> flask.Response:
+        origin = flask_request.headers.get("Origin", "*")
+        try:
+            entries = flask_request.get_json(force=True)
+            if isinstance(entries, list):
+                for entry in entries:
+                    dbg.store.push(entry)
+        except Exception:
+            pass
+        return flask.Response(
+            status=204,
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+            },
+        )
+
+    @app.route("/_/d", methods=["OPTIONS"])
+    def _cors() -> flask.Response:
+        origin = flask_request.headers.get("Origin", "*")
+        return flask.Response(
+            status=204,
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type",
+            },
+        )
 
     @app.before_request
     def _before() -> None:
@@ -58,6 +99,15 @@ def init_debugger(app: Flask, port: int = 5000) -> None:
                 "source": "server",
             }
         )
+
+        # Inject browser scripts into HTML responses
+        content_type = response.content_type or ""
+        if "text/html" in content_type:
+            html = response.get_data(as_text=True)
+            injected = inject_scripts(html)
+            if injected is not html:
+                response.set_data(injected)
+
         return response
 
     @app.teardown_request

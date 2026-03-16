@@ -3,7 +3,7 @@
 Usage in settings.py::
 
     MIDDLEWARE = [
-        "debugger_py.middleware.django.DebuggerMiddleware",
+        "ephem_debugger.middleware.django.DebuggerMiddleware",
         ...
     ]
 
@@ -12,13 +12,16 @@ Usage in settings.py::
 """
 from __future__ import annotations
 
+import json
 import logging
 import time
 from typing import Any
 
 from django.conf import settings
+from django.http import HttpResponse
 
 from .. import Debugger
+from ..browser import CLIENT_SCRIPT, inject_scripts
 
 _instance: Debugger | None = None
 
@@ -42,6 +45,40 @@ class DebuggerMiddleware:
 
     def __call__(self, request: Any) -> Any:
         """Process a request and capture timing."""
+        # Browser script
+        if request.path == "/_/d.js" and request.method == "GET":
+            return HttpResponse(
+                CLIENT_SCRIPT,
+                content_type="application/javascript",
+                headers={"Cache-Control": "no-store"},
+            )
+
+        # CORS preflight
+        if request.path == "/_/d" and request.method == "OPTIONS":
+            origin = request.headers.get("Origin", "*")
+            resp = HttpResponse(status=204)
+            resp["Access-Control-Allow-Origin"] = origin
+            resp["Access-Control-Allow-Credentials"] = "true"
+            resp["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+            resp["Access-Control-Allow-Headers"] = "Content-Type"
+            return resp
+
+        # Browser ingest
+        if request.path == "/_/d" and request.method == "POST":
+            origin = request.headers.get("Origin", "*")
+            try:
+                entries = json.loads(request.body)
+                if isinstance(entries, list) and _instance:
+                    for entry in entries:
+                        _instance.store.push(entry)
+            except Exception:
+                pass
+            resp = HttpResponse(status=204)
+            resp["Access-Control-Allow-Origin"] = origin
+            resp["Access-Control-Allow-Credentials"] = "true"
+            return resp
+
+        # Normal request — capture timing
         start = time.time()
         response = self.get_response(request)
         duration = int((time.time() - start) * 1000)
@@ -61,6 +98,16 @@ class DebuggerMiddleware:
                     "source": "server",
                 }
             )
+
+            # Inject browser scripts into HTML responses
+            content_type = response.get("Content-Type", "")
+            if "text/html" in content_type:
+                html = response.content.decode("utf-8", errors="replace")
+                injected = inject_scripts(html)
+                if injected is not html:
+                    encoded = injected.encode("utf-8")
+                    response.content = encoded
+                    response["Content-Length"] = len(encoded)
 
         return response
 

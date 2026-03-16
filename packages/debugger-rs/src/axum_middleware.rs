@@ -27,6 +27,7 @@ use axum::response::Response;
 use tower::{Layer, Service};
 
 use crate::bridge::Bridge;
+use crate::browser;
 use crate::capture::CaptureLayer as TracingCaptureLayer;
 use crate::protocol;
 use crate::store::LogStore;
@@ -126,8 +127,52 @@ where
 
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         let store = self.store.clone();
-        let method = req.method().to_string();
         let path = req.uri().path().to_string();
+        let method_ref = req.method().clone();
+
+        // Serve the browser IIFE script.
+        if path == "/_/d.js" && method_ref == axum::http::Method::GET {
+            return Box::pin(async move {
+                let mut builder = Response::builder()
+                    .header("content-type", "application/javascript")
+                    .header("cache-control", "no-store");
+                for (k, v) in &browser::CORS_HEADERS {
+                    builder = builder.header(*k, *v);
+                }
+                Ok(builder.body(Body::from(browser::CLIENT_SCRIPT)).unwrap_or_default())
+            });
+        }
+
+        // CORS preflight for the ingest endpoint.
+        if path == "/_/d" && method_ref == axum::http::Method::OPTIONS {
+            return Box::pin(async move {
+                let mut builder = Response::builder().status(204);
+                for (k, v) in &browser::CORS_HEADERS {
+                    builder = builder.header(*k, *v);
+                }
+                Ok(builder.body(Body::empty()).unwrap_or_default())
+            });
+        }
+
+        // Browser ingest endpoint.
+        if path == "/_/d" && method_ref == axum::http::Method::POST {
+            return Box::pin(async move {
+                let body_bytes = axum::body::to_bytes(req.into_body(), 1024 * 1024)
+                    .await
+                    .unwrap_or_default();
+                if let Ok(entries) = serde_json::from_slice::<Vec<serde_json::Value>>(&body_bytes) {
+                    browser::ingest_entries(&store, &entries);
+                }
+                let mut builder = Response::builder().status(204);
+                for (k, v) in &browser::CORS_HEADERS {
+                    builder = builder.header(*k, *v);
+                }
+                Ok(builder.body(Body::empty()).unwrap_or_default())
+            });
+        }
+
+        // Normal request — forward to inner service and capture metadata.
+        let method = method_ref.to_string();
         let start = Instant::now();
 
         // Clone the inner service (Tower pattern for async services)

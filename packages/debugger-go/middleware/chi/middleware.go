@@ -29,6 +29,7 @@ import (
 	"time"
 
 	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
+	"github.com/ephem-sh/debugger/packages/debugger-go/browser"
 	"github.com/ephem-sh/debugger/packages/debugger-go/capture"
 	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
 )
@@ -58,6 +59,9 @@ func Middleware(port int) func(http.Handler) http.Handler {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if browser.HandleRoutes(w, r, dbg.Store) {
+				return
+			}
 			start := time.Now()
 
 			// Wrap response writer to capture status code.
@@ -115,6 +119,24 @@ func (h *lazyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 }
 func (h *lazyHandler) WithGroup(name string) slog.Handler {
 	return h.resolve().WithGroup(name)
+}
+
+// Routes registers debugger browser routes on a Chi router.
+// Optional — the middleware already handles these routes. Use this
+// if you want explicit route registration.
+func Routes(r interface{ Get(string, http.HandlerFunc); Post(string, http.HandlerFunc) }) {
+	if instance == nil {
+		return
+	}
+	s := instance.Store
+
+	r.Get("/_/d.js", func(w http.ResponseWriter, req *http.Request) {
+		browser.HandleRoutes(w, req, s)
+	})
+
+	r.Post("/_/d", func(w http.ResponseWriter, req *http.Request) {
+		browser.HandleRoutes(w, req, s)
+	})
 }
 
 // Close stops the debugger. Call this in a defer after setting up

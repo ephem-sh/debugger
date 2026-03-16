@@ -57,6 +57,23 @@ dbg status
 dbg server console
 ```
 
+## Browser support
+
+Register browser routes with `browser_config`:
+
+```rust
+App::new()
+    .configure(actix_middleware::browser_config)
+    .wrap(middleware::from_fn(debugger_mw))
+```
+
+Add script tags before `</body>` in your HTML templates:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
 ## Full example
 
 See the complete working example at

@@ -34,9 +34,11 @@ use std::time::Instant;
 use actix_web::body::MessageBody;
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::middleware::Next;
-use actix_web::Error;
+use actix_web::web;
+use actix_web::{Error, HttpRequest, HttpResponse};
 
 use crate::bridge::Bridge;
+use crate::browser;
 use crate::capture::CaptureLayer as TracingCaptureLayer;
 use crate::protocol;
 use crate::store::LogStore;
@@ -125,4 +127,62 @@ pub async fn debugger_mw(
     }
 
     Ok(res)
+}
+
+/// Configure browser support routes on an Actix `ServiceConfig`.
+///
+/// Registers the `/_/d.js` (script), `/_/d` (ingest + CORS preflight)
+/// routes. Call this with [`App::configure`](actix_web::App::configure):
+///
+/// ```rust,ignore
+/// use actix_web::{App, middleware};
+/// use ephem_debugger::actix_middleware::{self, debugger_mw, browser_config};
+///
+/// let capture_layer = actix_middleware::init(8080);
+///
+/// HttpServer::new(|| {
+///     App::new()
+///         .configure(actix_middleware::browser_config)
+///         .wrap(middleware::from_fn(debugger_mw))
+///         .route("/", web::get().to(|| async { "Hello" }))
+/// })
+/// ```
+pub fn browser_config(cfg: &mut web::ServiceConfig) {
+    cfg.route("/_/d.js", web::get().to(serve_script))
+        .route("/_/d", web::post().to(ingest))
+        .route(
+            "/_/d",
+            web::method(actix_web::http::Method::OPTIONS).to(cors_preflight),
+        );
+}
+
+async fn serve_script() -> HttpResponse {
+    let mut resp = HttpResponse::Ok();
+    resp.content_type("application/javascript");
+    resp.insert_header(("cache-control", "no-store"));
+    for (k, v) in &browser::CORS_HEADERS {
+        resp.insert_header((*k, *v));
+    }
+    resp.body(browser::CLIENT_SCRIPT)
+}
+
+async fn ingest(body: web::Bytes) -> HttpResponse {
+    if let Some(store) = STORE.get()
+        && let Ok(entries) = serde_json::from_slice::<Vec<serde_json::Value>>(&body)
+    {
+        browser::ingest_entries(store, &entries);
+    }
+    let mut resp = HttpResponse::NoContent();
+    for (k, v) in &browser::CORS_HEADERS {
+        resp.insert_header((*k, *v));
+    }
+    resp.finish()
+}
+
+async fn cors_preflight(_req: HttpRequest) -> HttpResponse {
+    let mut resp = HttpResponse::NoContent();
+    for (k, v) in &browser::CORS_HEADERS {
+        resp.insert_header((*k, *v));
+    }
+    resp.finish()
 }

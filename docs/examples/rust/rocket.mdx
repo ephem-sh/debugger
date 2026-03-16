@@ -58,6 +58,23 @@ dbg status
 dbg server console
 ```
 
+## Browser support
+
+Mount browser routes:
+
+```rust
+rocket::build()
+    .attach(fairing)
+    .mount("/", rocket_middleware::browser_routes())
+```
+
+Add script tags before `</body>` in your HTML templates:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
 ## Full example
 
 See the complete working example at
