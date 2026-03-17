@@ -1,7 +1,9 @@
 name: Release Node
 on:
+  workflow_dispatch:
   push:
-    tags: ['debugger-v*']
+    tags:
+      - 'debugger-v*'
 
 jobs:
   publish:

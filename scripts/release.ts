@@ -327,7 +327,7 @@ async function releaseAll(dry: boolean): Promise<void> {
     await run(["git", "tag", tagName]);
   }
 
-  console.log(`\nDone. Push when ready: git push --follow-tags`);
+  console.log(`\nDone. Push when ready:\n  git push\n  git push --tags`);
 }
 
 async function releaseOne(pkgName: PackageName, dry: boolean): Promise<void> {
@@ -372,7 +372,7 @@ async function releaseOne(pkgName: PackageName, dry: boolean): Promise<void> {
   await run(["git", "commit", "-m", commitMsg]);
   await run(["git", "tag", tagName]);
 
-  console.log(`\nDone. Push when ready: git push --follow-tags`);
+  console.log(`\nDone. Push when ready:\n  git push\n  git push --tags`);
 }
 
 main();
