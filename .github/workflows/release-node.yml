@@ -16,10 +16,11 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - run: bun install
       - run: bun run build
+      - run: npm install -g npm@latest
       - run: cd packages/debugger && npm publish --provenance --access public
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
