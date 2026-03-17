@@ -1,7 +1,7 @@
 name: Release Node
 on:
   push:
-    tags: ['debugger@*']
+    tags: ['debugger-v*']
 
 jobs:
   publish:

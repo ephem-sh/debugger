@@ -96,7 +96,7 @@ async function getLastTag(tagPrefix: string): Promise<string | null> {
     "git",
     "tag",
     "--list",
-    `${tagPrefix}@*`,
+    `${tagPrefix}-v*`,
     "--sort=-v:refname",
   ]);
   if (!tags) return null;
@@ -138,7 +138,7 @@ async function readCurrentVersion(
 ): Promise<string> {
   if (!pkg.versionFile) {
     if (lastTag) {
-      const v = lastTag.split("@")[1];
+      const v = lastTag.replace(/^.*-v/, "");
       return v ?? "0.0.0";
     }
     return "0.0.0";
@@ -313,7 +313,7 @@ async function releaseAll(dry: boolean): Promise<void> {
   for (const p of pending) {
     console.log(`\nReleasing ${p.pkg.displayName} ${p.nextVersion}...`);
     const changelogEntry = generateChangelog(p.nextVersion, p.commits);
-    const tagName = `${p.pkg.tagPrefix}@${p.nextVersion}`;
+    const tagName = `${p.pkg.tagPrefix}-v${p.nextVersion}`;
     const commitMsg = `release(${p.name}): v${p.nextVersion}`;
 
     await updateVersionFile(p.pkg, p.nextVersion);
@@ -344,7 +344,7 @@ async function releaseOne(pkgName: PackageName, dry: boolean): Promise<void> {
   const bump = determineBump(commits);
   const nextVersion = bumpVersion(currentVersion, bump);
   const changelogEntry = generateChangelog(nextVersion, commits);
-  const tagName = `${pkg.tagPrefix}@${nextVersion}`;
+  const tagName = `${pkg.tagPrefix}-v${nextVersion}`;
   const commitMsg = `release(${pkgName}): v${nextVersion}`;
 
   console.log(

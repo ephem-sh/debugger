@@ -1,7 +1,7 @@
 name: Release Rust
 on:
   push:
-    tags: ['debugger-rs@*']
+    tags: ['debugger-rs-v*']
 
 jobs:
   publish:
