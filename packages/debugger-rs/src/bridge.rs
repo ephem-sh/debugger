@@ -60,6 +60,14 @@ impl Bridge {
         let listener = UnixListener::bind(&socket_path)
             .map_err(|e| BridgeError::Io(format!("bind unix socket: {e}")))?;
 
+        write_session_file(&store, None).await;
+
+        let cwd = std::env::current_dir()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+        let session_file = format!("{cwd}/.debugger/session.json");
+
         let sd = shutdown.clone();
         let task = tokio::spawn(async move {
             loop {
@@ -80,6 +88,7 @@ impl Bridge {
                 }
             }
             let _ = tokio::fs::remove_file(&socket_path).await;
+            let _ = tokio::fs::remove_file(&session_file).await;
         });
 
         Ok(Self {
@@ -126,6 +135,10 @@ impl Bridge {
 
         eprintln!("> @ephem-sh/debugger: bridge listening on {addr}");
 
+        write_session_file(&store, Some(&addr.to_string())).await;
+
+        let session_file = format!("{addr_dir}/session.json");
+
         let sd = shutdown.clone();
         let task = tokio::spawn(async move {
             loop {
@@ -145,8 +158,9 @@ impl Bridge {
                     }
                 }
             }
-            // Clean up bridge.addr
+            // Clean up bridge.addr and session.json
             let _ = tokio::fs::remove_file(&addr_file).await;
+            let _ = tokio::fs::remove_file(&session_file).await;
         });
 
         Ok(Self {
@@ -252,6 +266,24 @@ async fn write_error<W: tokio::io::AsyncWrite + Unpin>(
         error: Some(msg.to_string()),
     };
     write_response(writer, &resp).await
+}
+
+/// Write session.json to `.debugger/` so the CLI can discover the session.
+async fn write_session_file(store: &LogStore, socket_override: Option<&str>) {
+    let cwd = std::env::current_dir()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
+    let session_dir = format!("{cwd}/.debugger");
+    let _ = tokio::fs::create_dir_all(&session_dir).await;
+    let session_file = format!("{session_dir}/session.json");
+    let mut session = store.session().clone();
+    if let Some(addr) = socket_override {
+        session.socket_path = addr.to_string();
+    }
+    if let Ok(json) = serde_json::to_string(&session) {
+        let _ = tokio::fs::write(&session_file, format!("{json}\n")).await;
+    }
 }
 
 /// Errors that can occur when starting or running the bridge.

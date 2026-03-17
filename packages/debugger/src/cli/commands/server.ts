@@ -25,7 +25,7 @@ async function serverConsole(flags: Flags) {
       ids: flags.ids,
       source: 'server',
     },
-  }, flags.cwd)
+  }, { cwd: flags.cwd, port: flags.port, session: flags.session })
 
   if (!response.ok) { console.error(response.error); process.exit(1) }
   console.log(flags.json ? formatJson(response.data) : formatEntries(response.data))
@@ -42,7 +42,7 @@ async function serverErrors(flags: Flags) {
       ids: flags.ids,
       source: 'server',
     },
-  }, flags.cwd)
+  }, { cwd: flags.cwd, port: flags.port, session: flags.session })
 
   if (!response.ok) { console.error(response.error); process.exit(1) }
   console.log(flags.json ? formatJson(response.data) : formatEntries(response.data))

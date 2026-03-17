@@ -14,7 +14,7 @@ export async function all(flags: Flags) {
       last: flags.last,
       limit: flags.limit,
     },
-  }, flags.cwd)
+  }, { cwd: flags.cwd, port: flags.port, session: flags.session })
 
   if (!response.ok) {
     console.error(response.error)

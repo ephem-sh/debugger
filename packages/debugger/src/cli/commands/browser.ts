@@ -43,7 +43,7 @@ async function browserConsole(flags: Flags) {
       ids: flags.ids,
       source: 'browser',
     },
-  }, flags.cwd)
+  }, { cwd: flags.cwd, port: flags.port, session: flags.session })
 
   if (!response.ok) { console.error(response.error); process.exit(1) }
   console.log(flags.json ? formatJson(response.data) : formatEntries(response.data))
@@ -60,7 +60,7 @@ async function browserErrors(flags: Flags) {
       ids: flags.ids,
       source: 'browser',
     },
-  }, flags.cwd)
+  }, { cwd: flags.cwd, port: flags.port, session: flags.session })
 
   if (!response.ok) { console.error(response.error); process.exit(1) }
   console.log(flags.json ? formatJson(response.data) : formatEntries(response.data))
@@ -78,7 +78,7 @@ async function browserNetwork(flags: Flags) {
       id: flags.id,
       ids: flags.ids,
     },
-  }, flags.cwd)
+  }, { cwd: flags.cwd, port: flags.port, session: flags.session })
 
   if (!response.ok) { console.error(response.error); process.exit(1) }
 
@@ -112,7 +112,7 @@ async function browserApp(subcommand: string, flags: Flags) {
     },
   }
 
-  const response = await query(request, flags.cwd)
+  const response = await query(request, { cwd: flags.cwd, port: flags.port, session: flags.session })
   if (!response.ok) { console.error(response.error); process.exit(1) }
 
   const appEntries = response.data.filter(e => e.type === 'app')

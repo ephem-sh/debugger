@@ -52,6 +52,7 @@ Query server-side data. All server commands filter entries where
 |---------|-------------|
 | `dbg status` | Display session metadata (ID, framework, port, uptime) |
 | `dbg all` | Display all entries merged by timestamp (default) |
+| `dbg sessions` | List all active debugger sessions |
 
 ## Flags
 
@@ -89,6 +90,13 @@ All flags are optional and can be combined with any command.
 | `--name <name>` | Filter cookies by name |
 | `--key <key>` | Filter storage entries by key |
 | `--type <type>` | Filter storage by type (`local` or `session`) |
+
+### Session targeting
+
+| Flag | Description |
+|------|-------------|
+| `--port <port>` | Target a specific session by port number |
+| `--session <id>` | Target a specific session by session ID |
 
 ### Other
 
@@ -141,16 +149,52 @@ Get everything from the last 5 minutes as JSON:
 dbg all --last 5m --json
 ```
 
-## Session discovery
+## Multi-session support
 
-The CLI finds the active session by walking parent directories from
-the current working directory:
+When you run multiple dev servers (for example, a frontend, an API,
+and a docs site), each one gets its own debugger session. You can
+list all active sessions and target a specific one by port or ID.
+
+### List active sessions
+
+```bash
+dbg sessions
+```
+
+```
+  ID             Framework    Port    PID      Dir
+  ────────────── ──────────── ─────── ──────── ────────────────────
+  dev-a1b2c3     vite         5173    12345    /project/apps/web
+  dev-d4e5f6     hono         3000    12346    /project/apps/api
+  dev-g7h8i9     fastapi      8000    12347    /project/apps/py-api
+```
+
+### Target by port
+
+```bash
+dbg --port 3000 browser console
+dbg --port 5173 browser network
+dbg --port 8000 server console
+```
+
+### Target by session ID
+
+```bash
+dbg --session dev-a1b2c3 status
+dbg --session dev-d4e5f6 browser errors
+```
+
+### Default behavior
+
+Without `--port` or `--session`, the CLI finds the active session
+by walking parent directories from the current working directory:
 
 - **macOS/Linux:** looks for `.debugger/bridge.sock`
 - **Windows:** probes named pipes matching `\\.\pipe\debugger-<hash>`
   where `<hash>` is derived from the directory path
 
-If your dev server runs in a subdirectory, use `--cwd` to point to it:
+If your dev server runs in a subdirectory, use `--cwd` to point
+to it:
 
 ```bash
 dbg status --cwd ./apps/web

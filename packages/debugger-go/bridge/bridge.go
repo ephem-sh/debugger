@@ -70,8 +70,12 @@ func (b *Bridge) startWindows() error {
 		return fmt.Errorf("bridge: write addr file: %w", err)
 	}
 
+	// Update session socket path to actual TCP address for discovery
+	b.store.Session().SocketPath = ln.Addr().String()
+
 	b.wg.Add(1)
 	go b.acceptLoop()
+	b.writeSessionFile()
 	return nil
 }
 
@@ -90,6 +94,7 @@ func (b *Bridge) startUnix() error {
 
 	b.wg.Add(1)
 	go b.acceptLoop()
+	b.writeSessionFile()
 	return nil
 }
 
@@ -101,11 +106,14 @@ func (b *Bridge) Stop() error {
 	}
 	b.wg.Wait()
 
+	// Clean up session.json (both platforms).
+	cwd, _ := os.Getwd()
+	_ = os.Remove(filepath.Join(cwd, ".debugger", "session.json"))
+
 	if runtime.GOOS != "windows" {
 		_ = os.Remove(b.socketPath)
 	} else {
 		// Clean up .debugger/bridge.addr
-		cwd, _ := os.Getwd()
 		_ = os.Remove(filepath.Join(cwd, ".debugger", "bridge.addr"))
 	}
 	return nil
@@ -118,6 +126,22 @@ func (b *Bridge) Addr() net.Addr {
 		return nil
 	}
 	return b.listener.Addr()
+}
+
+func (b *Bridge) writeSessionFile() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return
+	}
+	sessionDir := filepath.Join(cwd, ".debugger")
+	_ = os.MkdirAll(sessionDir, 0o755)
+
+	data, err := json.Marshal(b.store.Session())
+	if err != nil {
+		return
+	}
+	data = append(data, '\n')
+	_ = os.WriteFile(filepath.Join(sessionDir, "session.json"), data, 0o644)
 }
 
 func (b *Bridge) acceptLoop() {

@@ -18,7 +18,31 @@ export function createBridge(logStore: LogStore, session: SessionInfo) {
   let server: net.Server | null = null
   const sockets = new Set<net.Socket>()
 
+  const sessionFilePath = path.join(process.cwd(), '.debugger', 'session.json')
+
+  /**
+   * Write session metadata to `.debugger/session.json` for multi-session discovery.
+   */
+  const writeSessionFile = () => {
+    const dir = path.dirname(sessionFilePath)
+    fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(
+      sessionFilePath,
+      JSON.stringify({
+        sessionId: session.sessionId,
+        framework: session.framework,
+        port: session.port,
+        pid: session.pid,
+        startedAt: session.startedAt,
+        socketPath: session.socketPath,
+      }) + '\n'
+    )
+  }
+
   const cleanup = () => {
+    try {
+      fs.unlinkSync(sessionFilePath)
+    } catch {}
     if (process.platform !== 'win32') {
       try {
         fs.unlinkSync(session.socketPath)
@@ -107,6 +131,7 @@ export function createBridge(logStore: LogStore, session: SessionInfo) {
 
     try {
       await listenServer(server)
+      writeSessionFile()
     } catch (err: unknown) {
       if (!isErrnoException(err) || err.code !== 'EADDRINUSE') throw err
 
@@ -123,6 +148,7 @@ export function createBridge(logStore: LogStore, session: SessionInfo) {
         server = createNetServer()
         try {
           await listenServer(server)
+          writeSessionFile()
         } catch {
           console.warn(
             '[debugger] Could not start IPC bridge after removing stale socket. CLI queries will not work.'
@@ -136,6 +162,7 @@ export function createBridge(logStore: LogStore, session: SessionInfo) {
           server = createNetServer()
           try {
             await listenServer(server)
+            writeSessionFile()
             retrySuccess = true
             break
           } catch {

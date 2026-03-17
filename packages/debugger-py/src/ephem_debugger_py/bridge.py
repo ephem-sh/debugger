@@ -47,6 +47,7 @@ class Bridge:
         self._running = True
         self._thread = threading.Thread(target=self._accept_loop, daemon=True)
         self._thread.start()
+        self._write_session_file()
 
     def _start_tcp(self) -> None:
         self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,9 +65,22 @@ class Bridge:
         with open(addr_file, "w") as f:
             f.write(addr_str)
 
+        # Update session socket_path to actual TCP address for discovery
+        self._store.session.socket_path = addr_str
+
         self._running = True
         self._thread = threading.Thread(target=self._accept_loop, daemon=True)
         self._thread.start()
+        self._write_session_file()
+
+    def _write_session_file(self) -> None:
+        """Write session.json for multi-session discovery."""
+        session_dir = os.path.join(os.getcwd(), ".debugger")
+        os.makedirs(session_dir, exist_ok=True)
+        session_file = os.path.join(session_dir, "session.json")
+        with open(session_file, "w") as f:
+            json.dump(self._store.session.to_dict(), f)
+            f.write("\n")
 
     def _accept_loop(self) -> None:
         while self._running:
@@ -140,6 +154,12 @@ class Bridge:
             self._server.close()
         if self._thread:
             self._thread.join(timeout=2)
+
+        # Remove session file
+        try:
+            os.unlink(os.path.join(os.getcwd(), ".debugger", "session.json"))
+        except OSError:
+            pass
 
         # Cleanup
         if os.name != "nt":

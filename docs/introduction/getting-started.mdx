@@ -109,9 +109,31 @@ dbg <command> [flags]
 
 **Top-level commands:**
 - `status` — session info
+- `sessions` — list all active sessions
 - `all` — everything merged (default)
 
 Run `npx dbg --help` for the full command and flag reference.
+
+## Multiple services
+
+When you run multiple dev servers at the same time, each one
+registers its own debugger session. Use `dbg sessions` to list
+them, and `--port` or `--session` to target a specific one:
+
+```bash
+# List all active sessions
+npx dbg sessions
+
+# Query a specific service by port
+npx dbg --port 3000 browser console
+npx dbg --port 8000 server console
+
+# Query by session ID
+npx dbg --session dev-a1b2c3 browser network
+```
+
+This works across languages — you can run a Node.js frontend, a
+Go API, and a Python service, then query each one independently.
 
 ## Next steps
 

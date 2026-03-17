@@ -4,6 +4,7 @@ import { browser } from './commands/browser.js'
 import { server } from './commands/server.js'
 import { status } from './commands/status.js'
 import { all } from './commands/all.js'
+import { sessions } from './commands/sessions.js'
 
 /** Parsed CLI flags controlling query filters and output format. */
 export interface Flags {
@@ -21,6 +22,10 @@ export interface Flags {
   json: boolean
   /** Override working directory for socket discovery */
   cwd?: string
+  /** Target session by port */
+  port?: number
+  /** Target session by session ID */
+  session?: string
   /** Single entry ID for detail view */
   id?: string
   /** Multiple entry IDs for detail view */
@@ -51,6 +56,7 @@ Scopes:
 Commands:
   status     Show session info
   all        Show all logs (default)
+  sessions   List active debugger sessions
 
 Browser Commands:
   dbg browser console       Console logs
@@ -82,11 +88,13 @@ Flags:
   --key <key>         Filter storage by key
   --type <type>       Filter storage by type (local, session)
   --cwd <path>        Override working directory
+  --port <port>       Target session by port
+  --session <id>      Target session by ID
   --help              Show help
 `.trim()
 
 const SCOPES = ['browser', 'server'] as const
-const TOP_COMMANDS = ['status', 'all'] as const
+const TOP_COMMANDS = ['status', 'all', 'sessions'] as const
 type Scope = (typeof SCOPES)[number]
 type TopCommand = (typeof TOP_COMMANDS)[number]
 
@@ -168,6 +176,21 @@ function parseArgs(argv: string[]): ParseResult {
       const val = argv[++i]
       if (!val) { console.error('--cwd requires a path.'); process.exit(1) }
       flags.cwd = val
+      i++; continue
+    }
+
+    if (arg === '--port') {
+      const val = argv[++i]
+      if (!val) { console.error('--port requires a port number.'); process.exit(1) }
+      flags.port = parseInt(val, 10)
+      if (isNaN(flags.port)) { console.error(`Invalid port: "${val}".`); process.exit(1) }
+      i++; continue
+    }
+
+    if (arg === '--session') {
+      const val = argv[++i]
+      if (!val) { console.error('--session requires a session ID.'); process.exit(1) }
+      flags.session = val
       i++; continue
     }
 
@@ -264,6 +287,7 @@ async function main() {
   switch (topCommand) {
     case 'status': return status(flags)
     case 'all': return all(flags)
+    case 'sessions': return sessions(flags)
   }
 }
 
