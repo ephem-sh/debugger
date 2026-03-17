@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 (2026-03-17)
+
+### Fixed
+- add repository url for npm provenance (3017373)
+
+
 ## 0.3.0 (2026-03-17)
 
 ### Added
