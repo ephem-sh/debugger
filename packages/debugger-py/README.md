@@ -16,7 +16,7 @@ pip install ephem-debugger-py
 
 ```python
 from fastapi import FastAPI
-from ephem_debugger.middleware.fastapi import instrument
+from ephem_debugger_py.middleware.fastapi import instrument
 
 app = FastAPI()
 instrument(app, port=8000)
@@ -26,7 +26,7 @@ instrument(app, port=8000)
 
 ```python
 from flask import Flask
-from ephem_debugger.middleware.flask import init_debugger
+from ephem_debugger_py.middleware.flask import init_debugger
 
 app = Flask(__name__)
 init_debugger(app, port=5000)
@@ -38,7 +38,7 @@ Add to `settings.py`:
 
 ```python
 MIDDLEWARE = [
-    'ephem_debugger.middleware.django.DebuggerMiddleware',
+    'ephem_debugger_py.middleware.django.DebuggerMiddleware',
     # ... other middleware
 ]
 

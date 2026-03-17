@@ -2,16 +2,16 @@
 
 Usage with FastAPI::
 
-    from debugger_py.middleware.fastapi import Middleware, logger, close
+    from ephem_debugger_py.middleware.fastapi import Middleware, logger, close
     app.add_middleware(Middleware, port=8000)
 
 Usage with Django (settings.py)::
 
-    MIDDLEWARE = ["debugger_py.middleware.django.DebuggerMiddleware", ...]
+    MIDDLEWARE = ["ephem_debugger_py.middleware.django.DebuggerMiddleware", ...]
 
 Usage with Flask::
 
-    from debugger_py.middleware.flask import init_debugger
+    from ephem_debugger_py.middleware.flask import init_debugger
     init_debugger(app, port=5000)
 """
 from __future__ import annotations

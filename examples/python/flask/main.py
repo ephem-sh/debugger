@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, make_response
-from ephem_debugger.middleware.flask import init_debugger, logger, close
+from ephem_debugger_py.middleware.flask import init_debugger, logger, close
 
 app = Flask(__name__)
 init_debugger(app, port=5000)

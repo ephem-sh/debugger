@@ -2,7 +2,7 @@
 
 Usage::
 
-    from ephem_debugger.middleware.fastapi import instrument, logger, close
+    from ephem_debugger_py.middleware.fastapi import instrument, logger, close
 
     app = FastAPI()
     instrument(app, port=8000)

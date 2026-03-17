@@ -575,7 +575,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ephem-debugger"
+name = "ephem-debugger-rs"
 version = "0.1.0"
 dependencies = [
  "actix-web",

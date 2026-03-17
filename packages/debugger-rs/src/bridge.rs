@@ -42,6 +42,7 @@ impl Bridge {
         store: Arc<LogStore>,
         shutdown: Arc<Notify>,
     ) -> Result<Self, BridgeError> {
+        use std::path::Path;
         use tokio::net::UnixListener;
 
         let socket_path = store.session().socket_path.clone();

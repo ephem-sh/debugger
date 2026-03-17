@@ -31,7 +31,7 @@ Add the middleware to your FastAPI app:
 
 ```python
 from fastapi import FastAPI
-from ephem_debugger.middleware.fastapi import Middleware, logger, close
+from ephem_debugger_py.middleware.fastapi import Middleware, logger, close
 
 app = FastAPI()
 app.add_middleware(Middleware, port=8000)

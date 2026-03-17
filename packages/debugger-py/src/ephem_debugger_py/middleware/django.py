@@ -3,7 +3,7 @@
 Usage in settings.py::
 
     MIDDLEWARE = [
-        "ephem_debugger.middleware.django.DebuggerMiddleware",
+        "ephem_debugger_py.middleware.django.DebuggerMiddleware",
         ...
     ]
 

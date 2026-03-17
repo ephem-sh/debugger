@@ -62,9 +62,9 @@ dbg all --json                # everything as JSON
 
 | Framework | Setup | Middleware |
 |-----------|-------|-----------|
-| FastAPI | 2 lines | `ephem_debugger.middleware.fastapi` |
-| Flask | 2 lines | `ephem_debugger.middleware.flask` |
-| Django | 1 line | `ephem_debugger.middleware.django` |
+| FastAPI | 2 lines | `ephem_debugger_py.middleware.fastapi` |
+| Flask | 2 lines | `ephem_debugger_py.middleware.flask` |
+| Django | 1 line | `ephem_debugger_py.middleware.django` |
 
 ### Rust — `ephem-debugger-rs`
 
