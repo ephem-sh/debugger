@@ -1,7 +1,9 @@
 name: Release Rust
 on:
+  workflow_dispatch:
   push:
-    tags: ['debugger-rs-v*']
+    tags:
+      - 'debugger-rs-v*'
 
 jobs:
   publish:

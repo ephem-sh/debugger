@@ -1,7 +1,9 @@
 name: Release Python
 on:
+  workflow_dispatch:
   push:
-    tags: ['debugger-py-v*']
+    tags:
+      - 'debugger-py-v*'
 
 jobs:
   publish:

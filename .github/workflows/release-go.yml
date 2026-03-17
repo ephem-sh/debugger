@@ -1,7 +1,9 @@
 name: Release Go
 on:
+  workflow_dispatch:
   push:
-    tags: ['debugger-go-v*']
+    tags:
+      - 'debugger-go-v*'
 
 jobs:
   publish:
@@ -17,7 +19,6 @@ jobs:
         run: cd packages/debugger-go && go build ./...
       - name: Create Go module tag
         run: |
-          # Extract version from tag: debugger-go@1.2.3 -> 1.2.3
           VERSION="${GITHUB_REF_NAME#debugger-go-v}"
           GO_TAG="packages/ephem-debugger-go/v${VERSION}"
           git tag "${GO_TAG}"
