@@ -1,0 +1,28 @@
+name: Release Go
+on:
+  push:
+    tags: ['debugger-go@*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Verify build
+        run: cd packages/debugger-go && go build ./...
+      - name: Create Go module tag
+        run: |
+          # Extract version from tag: debugger-go@1.2.3 -> 1.2.3
+          VERSION="${GITHUB_REF_NAME#debugger-go@}"
+          GO_TAG="packages/ephem-debugger-go/v${VERSION}"
+          git tag "${GO_TAG}"
+          git push origin "${GO_TAG}"
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

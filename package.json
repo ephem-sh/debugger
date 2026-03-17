@@ -1,5 +1,5 @@
 {
-  "name": "debuger",
+  "name": "debugger",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -7,11 +7,11 @@
   "scripts": {
     "build": "bun run --cwd packages/debugger build",
     "typecheck": "bun run --cwd packages/debugger typecheck",
-    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
     "example": "bun run scripts/example.ts",
     "install:example": "bun run scripts/example.ts install",
     "dev:example": "bun run scripts/example.ts dev",
-    "examples": "bun run scripts/example.ts list"
+    "examples": "bun run scripts/example.ts list",
+    "release": "bun run scripts/release.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
