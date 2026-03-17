@@ -3,7 +3,7 @@ module github.com/ephem-sh/debugger/examples/go/echo
 go 1.25.0
 
 require (
-	github.com/ephem-sh/debugger/packages/debugger-go v0.0.0
+	github.com/ephem-sh/debugger/packages/ephem-debugger-go v0.0.0
 	github.com/labstack/echo/v4 v4.15.1
 )
 
@@ -19,4 +19,4 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 )
 
-replace github.com/ephem-sh/debugger/packages/debugger-go => ../../../packages/debugger-go
+replace github.com/ephem-sh/debugger/packages/ephem-debugger-go => ../../../packages/debugger-go

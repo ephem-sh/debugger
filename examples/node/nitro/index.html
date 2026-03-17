@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/nitro.svg" />
+    <title>Nitro + Vite</title>
+    <style>
+      @import "~/app/assets/main.css";
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <div>
+          <a href="https://nitro.build/" target="_blank">
+            <img
+              src="/app/assets/nitro.svg"
+              class="logo nitro"
+              alt="Nitro logo"
+            />
+          </a>
+          <a href="https://vite.dev" target="_blank">
+            <img src="/app/assets/vite.svg" class="logo" alt="Vite logo" />
+          </a>
+          <h1>Nitro + Vite</h1>
+          <div id="app" class="card"></div>
+          <div style="margin-top: 2rem; padding: 1.5rem; border: 1px solid #333; border-radius: 8px;">
+            <h3>Debugger Test Panel</h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+              <button onclick="fetch('/api/test').then(r=>r.json()).then(d=>document.getElementById('result').textContent=JSON.stringify(d))">GET /api/test</button>
+              <button onclick="fetch('/api/test?error=true').then(r=>r.json()).then(d=>document.getElementById('result').textContent=JSON.stringify(d))">GET /api/test (error)</button>
+              <button onclick="fetch('/api/users').then(r=>r.json()).then(d=>document.getElementById('result').textContent=JSON.stringify(d))">GET /api/users</button>
+              <button onclick="console.log('browser log', Date.now())">console.log</button>
+              <button onclick="console.warn('browser warn', Date.now())">console.warn</button>
+              <button onclick="console.error('browser error', Date.now())">console.error</button>
+            </div>
+            <pre id="result" style="margin-top: 1rem; padding: 0.75rem; background: #1a1a1a; border-radius: 4px; min-height: 2rem; overflow-x: auto;"></pre>
+          </div>
+        </div>
+      </div>
+      <script type="module" src="/app/entry-client.ts"></script>
+    </main>
+  </body>
+</html>

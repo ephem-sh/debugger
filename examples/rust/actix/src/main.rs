@@ -1,5 +1,5 @@
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
-use ephem_debugger::actix_middleware::{self, debugger_mw};
+use ephem_debugger_rs::actix_middleware::{self, debugger_mw};
 use serde_json::json;
 use tracing_subscriber::prelude::*;
 

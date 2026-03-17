@@ -1,4 +1,4 @@
-module github.com/ephem-sh/debugger/packages/debugger-go
+module github.com/ephem-sh/debugger/packages/ephem-debugger-go
 
 go 1.25.0
 

@@ -51,6 +51,30 @@
     "./angular": {
       "types": "./dist/adapters/angular/index.d.ts",
       "import": "./dist/adapters/angular/index.js"
+    },
+    "./express": {
+      "types": "./dist/adapters/express/index.d.ts",
+      "import": "./dist/adapters/express/index.js"
+    },
+    "./hono": {
+      "types": "./dist/adapters/hono/index.d.ts",
+      "import": "./dist/adapters/hono/index.js"
+    },
+    "./elysia": {
+      "types": "./dist/adapters/elysia/index.d.ts",
+      "import": "./dist/adapters/elysia/index.js"
+    },
+    "./fastify": {
+      "types": "./dist/adapters/fastify/index.d.ts",
+      "import": "./dist/adapters/fastify/index.js"
+    },
+    "./nest": {
+      "types": "./dist/adapters/nest/index.d.ts",
+      "import": "./dist/adapters/nest/index.js"
+    },
+    "./adonis": {
+      "types": "./dist/adapters/adonis/index.d.ts",
+      "import": "./dist/adapters/adonis/index.js"
     }
   },
   "files": [

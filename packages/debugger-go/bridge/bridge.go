@@ -15,8 +15,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
-	"github.com/ephem-sh/debugger/packages/debugger-go/store"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/store"
 )
 
 // Bridge is the IPC server that the dbg CLI connects to.

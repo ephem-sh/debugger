@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	import dbg "github.com/ephem-sh/debugger/packages/debugger-go/middleware/echo"
+//	import dbg "github.com/ephem-sh/debugger/packages/ephem-debugger-go/middleware/echo"
 //
 //	e := echo.New()
 //	e.Use(dbg.Middleware(9877))
@@ -29,10 +29,10 @@ import (
 
 	lecho "github.com/labstack/echo/v4"
 
-	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
-	"github.com/ephem-sh/debugger/packages/debugger-go/browser"
-	"github.com/ephem-sh/debugger/packages/debugger-go/capture"
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
+	debugger "github.com/ephem-sh/debugger/packages/ephem-debugger-go"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/browser"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/capture"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
 )
 
 var instance *debugger.Debugger

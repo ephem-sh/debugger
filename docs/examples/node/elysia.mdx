@@ -1,0 +1,55 @@
+---
+title: Elysia
+description: Set up debugger in an Elysia project.
+order: 26
+---
+
+# Elysia
+
+This guide covers adding debugger to an [Elysia](https://elysiajs.com)
+project. The setup takes one line.
+
+## Install
+
+```bash
+bun add -D @ephem-sh/debugger
+```
+
+## Set up
+
+Use the debugger plugin with your Elysia app:
+
+```ts
+import { Elysia } from 'elysia'
+import { debuggerPlugin } from '@ephem-sh/debugger/elysia'
+
+const app = new Elysia()
+  .use(debuggerPlugin({ port: 3000 }))
+  .get('/', () => 'Hello')
+  .listen(3000)
+```
+
+The plugin registers browser routes (`/_/d.js`, `/_/d`), captures
+HTTP request timing, and starts the IPC bridge.
+
+## Browser support
+
+Add script tags before `</body>` in your HTML responses:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+## Verify
+
+```bash
+bun run --watch src/index.ts
+dbg status
+dbg browser console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/elysia](https://github.com/ephem-sh/debugger/tree/main/examples/node/elysia).

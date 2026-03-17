@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	dbg "github.com/ephem-sh/debugger/packages/debugger-go/middleware/gin"
+	dbg "github.com/ephem-sh/debugger/packages/ephem-debugger-go/middleware/gin"
 )
 
 const testPage = `<!DOCTYPE html>

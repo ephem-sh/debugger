@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	dbg "github.com/ephem-sh/debugger/packages/debugger-go/middleware/chi"
+	dbg "github.com/ephem-sh/debugger/packages/ephem-debugger-go/middleware/chi"
 )
 
 const testPage = `<!DOCTYPE html>

@@ -1,0 +1,54 @@
+---
+title: Hono
+description: Set up debugger in a Hono project.
+order: 25
+---
+
+# Hono
+
+This guide covers adding debugger to a [Hono](https://hono.dev)
+project. The setup takes one line.
+
+## Install
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## Set up
+
+Add the middleware to your Hono app:
+
+```ts
+import { Hono } from 'hono'
+import { debuggerMiddleware } from '@ephem-sh/debugger/hono'
+
+const app = new Hono()
+app.use(debuggerMiddleware({ port: 3000 }))
+```
+
+The middleware handles server instrumentation (console patching,
+IPC bridge), browser script serving (`/_/d.js`), and browser log
+ingestion (`/_/d`).
+
+## Browser support
+
+Add script tags before `</body>` in your HTML responses:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+## Verify
+
+```bash
+bun run --hot src/index.ts
+dbg status
+dbg browser console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/hono](https://github.com/ephem-sh/debugger/tree/main/examples/node/hono).

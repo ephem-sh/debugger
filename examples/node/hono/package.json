@@ -1,0 +1,13 @@
+{
+  "name": "hono",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.12.8"
+  },
+  "devDependencies": {
+    "@ephem-sh/debugger": "file:../../../packages/debugger",
+    "@types/bun": "latest"
+  }
+}

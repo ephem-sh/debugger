@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	import dbg "github.com/ephem-sh/debugger/packages/debugger-go/middleware/gin"
+//	import dbg "github.com/ephem-sh/debugger/packages/ephem-debugger-go/middleware/gin"
 //
 //	r := gin.New()
 //	r.Use(gin.Recovery())
@@ -33,10 +33,10 @@ import (
 
 	ggin "github.com/gin-gonic/gin"
 
-	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
-	"github.com/ephem-sh/debugger/packages/debugger-go/browser"
-	"github.com/ephem-sh/debugger/packages/debugger-go/capture"
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
+	debugger "github.com/ephem-sh/debugger/packages/ephem-debugger-go"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/browser"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/capture"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
 )
 
 var instance *debugger.Debugger

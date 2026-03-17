@@ -1,0 +1,65 @@
+---
+title: NestJS
+description: Set up debugger in a NestJS project.
+order: 28
+---
+
+# NestJS
+
+This guide covers adding debugger to a [NestJS](https://nestjs.com)
+project. The setup takes two steps.
+
+## Install
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## 1. Initialize and apply middleware
+
+In your `src/main.ts`, call `initDebugger` and apply the middleware
+via `app.use()`:
+
+```ts
+import { NestFactory } from '@nestjs/core'
+import { AppModule } from './app.module'
+import { initDebugger, DebuggerMiddleware } from '@ephem-sh/debugger/nest'
+
+initDebugger({ port: 3000 })
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule)
+
+  const mw = new DebuggerMiddleware()
+  app.use((req, res, next) => mw.use(req, res, next))
+
+  await app.listen(3000)
+}
+bootstrap()
+```
+
+The middleware is applied at the Express layer (via `app.use()`)
+rather than via `MiddlewareConsumer` so it intercepts all requests
+including `/_/d.js` and `/_/d`.
+
+## 2. Add script tags
+
+Add script tags before `</body>` in your HTML templates:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+## Verify
+
+```bash
+npm run start:dev
+dbg status
+dbg browser console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/nest](https://github.com/ephem-sh/debugger/tree/main/examples/node/nest).

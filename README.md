@@ -1,6 +1,6 @@
 # debugger
 
-Dev-only observability for AI agent debugging. 4 languages, 21
+Dev-only observability for AI agent debugging. 4 languages, 28
 frameworks, zero production footprint.
 
 Agents when don't run the own servers don't have terminal context, to get information from browsers we often need MCP servers, and pasting information back to agents is a time consuming process. Debugger is aimed for you who don't want to run mcp servers and usually preferer running servers in separated terminals instead of bloating agent context with outputs, now agents can do all that and filter what they need to debug using proper filters.
@@ -42,8 +42,15 @@ dbg all --json                # everything as JSON
 | TanStack Start | 3 files | `@ephem-sh/debugger/vite` + `/vite/tanstack-start` |
 | Waku | 1 file | `@ephem-sh/debugger/vite` |
 | Angular | 2 files | `@ephem-sh/debugger/angular` |
+| Express | 1 line | `@ephem-sh/debugger/express` |
+| Hono | 1 line | `@ephem-sh/debugger/hono` |
+| Elysia | 1 line | `@ephem-sh/debugger/elysia` |
+| Fastify | 1 line | `@ephem-sh/debugger/fastify` |
+| NestJS | 2 lines | `@ephem-sh/debugger/nest` |
+| AdonisJS | 2 files | `@ephem-sh/debugger/adonis` |
+| Nitro | 2 files | `@ephem-sh/debugger/vite` + middleware |
 
-### Go — `debugger-go`
+### Go — `ephem-debugger-go`
 
 | Framework | Setup | Middleware |
 |-----------|-------|-----------|
@@ -51,7 +58,7 @@ dbg all --json                # everything as JSON
 | Echo | 3 lines | `middleware/echo` |
 | Chi | 3 lines | `middleware/chi` |
 
-### Python — `ephem-debugger`
+### Python — `ephem-debugger-py`
 
 | Framework | Setup | Middleware |
 |-----------|-------|-----------|
@@ -59,7 +66,7 @@ dbg all --json                # everything as JSON
 | Flask | 2 lines | `ephem_debugger.middleware.flask` |
 | Django | 1 line | `ephem_debugger.middleware.django` |
 
-### Rust — `ephem-debugger`
+### Rust — `ephem-debugger-rs`
 
 | Framework | Setup | Feature |
 |-----------|-------|---------|

@@ -1,0 +1,106 @@
+---
+title: Nitro
+description: Set up debugger in a standalone Nitro project.
+order: 30
+---
+
+# Nitro
+
+This guide covers adding debugger to a standalone
+[Nitro](https://nitro.build) project with Vite. The setup takes
+three steps.
+
+## Install
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## 1. Add the Vite plugin
+
+Update `vite.config.ts`:
+
+```ts
+import { defineConfig } from 'vite'
+import { debuggerPlugin } from '@ephem-sh/debugger/vite'
+
+export default defineConfig({
+  plugins: [debuggerPlugin()],
+})
+```
+
+This handles server-side instrumentation (console patching, IPC
+bridge) and browser script injection for SPA pages via
+`transformIndexHtml`.
+
+## 2. Add the Nitro server middleware
+
+Create `server/middleware/debugger.ts` to handle browser log
+ingestion. Nitro runs in a separate worker from Vite, so the
+middleware pushes entries via IPC:
+
+```ts
+import { defineHandler } from 'nitro'
+import { createConnection } from 'node:net'
+import { join } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+
+function pushViaIPC(entries: unknown[]): void {
+  const cwd = process.cwd()
+  const addrFile = join(cwd, '.debugger', 'bridge.addr')
+  let target: string
+
+  if (existsSync(addrFile)) {
+    target = readFileSync(addrFile, 'utf-8').trim()
+  } else if (process.platform === 'win32') {
+    const hash = createHash('md5').update(cwd).digest('hex').slice(0, 8)
+    target = `\\\\.\\pipe\\debugger-${hash}`
+  } else {
+    target = join(cwd, '.debugger', 'bridge.sock')
+  }
+
+  try {
+    const m = target.match(/^(\d+\.\d+\.\d+\.\d+):(\d+)$/)
+    const opts = m
+      ? { host: m[1], port: parseInt(m[2], 10) }
+      : { path: target }
+    const socket = createConnection(opts, () => {
+      socket.write(
+        JSON.stringify({ id: 'push', command: 'push', entries }) + '\n'
+      )
+      socket.end()
+    })
+    socket.on('error', () => {})
+  } catch {}
+}
+
+export default defineHandler(async (event) => {
+  if (event.url.pathname === '/_/d' && event.req.method === 'POST') {
+    try {
+      const entries = await event.req.json()
+      if (Array.isArray(entries)) pushViaIPC(entries)
+    } catch {}
+    event.res.status = 204
+    return ''
+  }
+})
+```
+
+## 3. Add test buttons to index.html
+
+The Vite plugin auto-injects the debugger script tags into
+`index.html`. No manual script tags needed for the SPA page.
+
+## Verify
+
+```bash
+bun run dev
+dbg status
+dbg browser console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/nitro](https://github.com/ephem-sh/debugger/tree/main/examples/node/nitro).

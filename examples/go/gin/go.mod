@@ -3,7 +3,7 @@ module github.com/ephem-sh/debugger/examples/go/gin
 go 1.25.0
 
 require (
-	github.com/ephem-sh/debugger/packages/debugger-go v0.0.0
+	github.com/ephem-sh/debugger/packages/ephem-debugger-go v0.0.0
 	github.com/gin-gonic/gin v1.12.0
 )
 
@@ -39,4 +39,4 @@ require (
 	google.golang.org/protobuf v1.36.10 // indirect
 )
 
-replace github.com/ephem-sh/debugger/packages/debugger-go => ../../../packages/debugger-go
+replace github.com/ephem-sh/debugger/packages/ephem-debugger-go => ../../../packages/debugger-go

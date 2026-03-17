@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite dev",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@ephem-sh/debugger": "file:../../../packages/debugger",
+    "nitro": "latest",
+    "vite": "latest"
+  }
+}

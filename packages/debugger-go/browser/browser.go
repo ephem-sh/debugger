@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
-	"github.com/ephem-sh/debugger/packages/debugger-go/store"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/store"
 )
 
 // ScriptTags is the HTML snippet injected before </body> to load the

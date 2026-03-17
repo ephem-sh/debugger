@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
-	"github.com/ephem-sh/debugger/packages/debugger-go/middleware/stdlib"
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
-	"github.com/ephem-sh/debugger/packages/debugger-go/store"
+	debugger "github.com/ephem-sh/debugger/packages/ephem-debugger-go"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/middleware/stdlib"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/store"
 )
 
 // newDebuggerWithStore constructs a Debugger with only the Store field set,

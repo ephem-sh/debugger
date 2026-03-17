@@ -1,0 +1,57 @@
+---
+title: Express
+description: Set up debugger in an Express.js project.
+order: 24
+---
+
+# Express
+
+This guide covers adding debugger to an [Express](https://expressjs.com)
+project. The setup takes one line.
+
+## Install
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## Set up
+
+Import and call `instrumentExpress` with your Express app:
+
+```ts
+import express from 'express'
+import { instrumentExpress } from '@ephem-sh/debugger/express'
+
+const app = express()
+instrumentExpress(app)
+```
+
+This sets up the log store, IPC bridge, console patching, and HTTP
+middleware for the ingest endpoint and browser client script. It
+no-ops when `NODE_ENV` is `production`.
+
+## Browser support
+
+The middleware automatically serves `/_/d.js` and handles `POST /_/d`
+for browser log ingestion. Add script tags before `</body>` in your
+HTML templates:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+## Verify
+
+```bash
+node index.ts
+dbg status
+dbg browser console
+dbg server console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/expressjs](https://github.com/ephem-sh/debugger/tree/main/examples/node/expressjs).

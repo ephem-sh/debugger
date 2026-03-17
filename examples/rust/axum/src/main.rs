@@ -1,5 +1,5 @@
 use axum::{http::header, response::Html, routing::get, routing::post, Json, Router};
-use ephem_debugger::axum_middleware;
+use ephem_debugger_rs::axum_middleware;
 use serde_json::{json, Value};
 use tracing_subscriber::prelude::*;
 

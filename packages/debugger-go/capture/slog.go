@@ -8,8 +8,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
-	"github.com/ephem-sh/debugger/packages/debugger-go/store"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/store"
 )
 
 // Handler is an slog.Handler that captures log records into the debugger

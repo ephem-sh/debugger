@@ -1,0 +1,74 @@
+---
+title: AdonisJS
+description: Set up debugger in an AdonisJS project.
+order: 29
+---
+
+# AdonisJS
+
+This guide covers adding debugger to an
+[AdonisJS](https://adonisjs.com) project. The setup takes two steps.
+
+## Install
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## 1. Create the middleware
+
+Create `app/middleware/debugger_middleware.ts`:
+
+```ts
+import { initDebugger, DebuggerMiddleware as Base } from '@ephem-sh/debugger/adonis'
+import type { HttpContext } from '@adonisjs/core/http'
+import type { NextFn } from '@adonisjs/core/types/http'
+
+initDebugger({ port: 3333 })
+
+const base = new Base()
+
+export default class DebuggerMiddleware {
+  async handle(ctx: HttpContext, next: NextFn) {
+    return base.handle(ctx, next)
+  }
+}
+```
+
+## 2. Register as global middleware
+
+In `start/kernel.ts`, add the middleware as the first entry in
+`server.use()`:
+
+```ts
+server.use([
+  () => import('#middleware/debugger_middleware'),
+  // ... other middleware
+])
+```
+
+Placing it first ensures it intercepts `/_/d.js` and `/_/d` before
+other middleware runs.
+
+## Browser support
+
+Add script tags before `</body>` in your Edge layout template
+(for example, `resources/views/components/layout.edge`):
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+## Verify
+
+```bash
+node ace serve --hmr
+dbg status
+dbg browser console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/adonis](https://github.com/ephem-sh/debugger/tree/main/examples/node/adonis).

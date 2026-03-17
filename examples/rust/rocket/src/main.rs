@@ -1,4 +1,4 @@
-use ephem_debugger::rocket_middleware;
+use ephem_debugger_rs::rocket_middleware;
 use rocket::response::content::RawHtml;
 use rocket::serde::json::Json;
 use serde_json::{json, Value};

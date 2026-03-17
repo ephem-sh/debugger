@@ -5,9 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "ephem-debugger",
+    "ephem-debugger-py",
     "fastapi[standard]>=0.135.1",
 ]
 
 [tool.uv.sources]
-ephem-debugger = { path = "../../../packages/debugger-py", editable = true }
+ephem-debugger-py = { path = "../../../packages/debugger-py", editable = true }

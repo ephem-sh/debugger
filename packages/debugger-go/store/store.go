@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
 )
 
 // Default ring buffer capacities.

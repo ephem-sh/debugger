@@ -1,4 +1,4 @@
-use ephem_debugger::poem_middleware;
+use ephem_debugger_rs::poem_middleware;
 use poem::{get, handler, listener::TcpListener, web::Html, web::Json, web::Query, EndpointExt, Route, Server};
 use serde_json::{json, Value};
 use std::collections::HashMap;

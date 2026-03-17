@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	dbg "github.com/ephem-sh/debugger/packages/debugger-go/middleware/echo"
+	dbg "github.com/ephem-sh/debugger/packages/ephem-debugger-go/middleware/echo"
 )
 
 const testPage = `<!DOCTYPE html>

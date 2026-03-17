@@ -1,5 +1,5 @@
 [project]
-name = "ephem-debugger"
+name = "ephem-debugger-py"
 version = "0.1.0"
 description = "Dev-only observability for AI agent debugging"
 readme = "README.md"

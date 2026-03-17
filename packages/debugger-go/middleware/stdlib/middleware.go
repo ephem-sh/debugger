@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	debugger "github.com/ephem-sh/debugger/packages/debugger-go"
-	"github.com/ephem-sh/debugger/packages/debugger-go/browser"
-	"github.com/ephem-sh/debugger/packages/debugger-go/protocol"
+	debugger "github.com/ephem-sh/debugger/packages/ephem-debugger-go"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/browser"
+	"github.com/ephem-sh/debugger/packages/ephem-debugger-go/protocol"
 )
 
 // Middleware returns an http.Handler middleware that captures HTTP

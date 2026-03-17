@@ -1,0 +1,53 @@
+---
+title: Fastify
+description: Set up debugger in a Fastify project.
+order: 27
+---
+
+# Fastify
+
+This guide covers adding debugger to a [Fastify](https://fastify.dev)
+project. The setup takes one line.
+
+## Install
+
+```bash
+npm install -D @ephem-sh/debugger
+```
+
+## Set up
+
+Register the debugger plugin with your Fastify instance:
+
+```js
+import Fastify from 'fastify'
+import { debuggerPlugin } from '@ephem-sh/debugger/fastify'
+
+const fastify = Fastify({ logger: true })
+await fastify.register(debuggerPlugin, { port: 3000 })
+```
+
+The plugin registers browser routes, adds `onRequest`/`onResponse`
+hooks for HTTP timing, and starts the IPC bridge.
+
+## Browser support
+
+Add script tags before `</body>` in your HTML responses:
+
+```html
+<script>window.__DEBUGGER_INGEST_URL__="/_/d";</script>
+<script src="/_/d.js" defer></script>
+```
+
+## Verify
+
+```bash
+node server.mjs
+dbg status
+dbg browser console
+```
+
+## Full example
+
+See the complete working example at
+[examples/node/fastify](https://github.com/ephem-sh/debugger/tree/main/examples/node/fastify).
