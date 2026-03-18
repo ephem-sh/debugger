@@ -1,6 +1,6 @@
 {
   "name": "@ephem-sh/debugger",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "bin": {
     "dbg": "./dist/cli/index.js"
