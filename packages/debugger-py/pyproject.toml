@@ -1,6 +1,6 @@
 [project]
 name = "ephem-debugger-py"
-version = "0.3.0"
+version = "0.3.1"
 description = "Dev-only observability for AI agent debugging"
 readme = "README.md"
 authors = [
