@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - run: cd packages/debugger-rs && cargo publish
+      - run: cd packages/debugger-rs && cargo publish --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
       - name: Create GitHub Release
