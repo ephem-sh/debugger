@@ -16,7 +16,8 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "publish=true" >> $GITHUB_OUTPUT
-            echo "version=0.0.0" >> $GITHUB_OUTPUT
+            VERSION=$(grep -m1 '^version' packages/debugger-py/pyproject.toml | grep -oP '"\\K[0-9.]+')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
             exit 0
           fi
           COMMITS='${{ toJSON(github.event.commits.*.message) }}'
