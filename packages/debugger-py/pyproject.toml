@@ -9,6 +9,10 @@ authors = [
 requires-python = ">=3.10"
 dependencies = []
 
+[project.urls]
+Homepage = "https://debugger.ephem.sh/"
+Repository = "https://github.com/ephem-sh/debugger"
+
 [project.optional-dependencies]
 fastapi = ["fastapi>=0.100.0", "starlette>=0.27.0"]
 django = ["django>=4.2"]

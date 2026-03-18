@@ -82,6 +82,11 @@ npx dbg browser network
 - **Python** — [`ephem-debugger-py`](https://pypi.org/project/ephem-debugger-py/)
 - **Rust** — [`ephem-debugger-rs`](https://crates.io/crates/ephem-debugger-rs)
 
+## Links
+
+- Website: https://debugger.ephem.sh/
+- Repository: https://github.com/ephem-sh/debugger
+
 ## License
 
 MIT

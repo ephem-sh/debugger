@@ -4,6 +4,8 @@ version = "0.3.0"
 edition = "2024"
 description = "Dev-only observability for AI agent debugging"
 license = "MIT"
+homepage = "https://debugger.ephem.sh/"
+repository = "https://github.com/ephem-sh/debugger"
 
 [features]
 default = []
