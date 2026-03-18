@@ -21,7 +21,7 @@ jobs:
             exit 0
           fi
           COMMITS='${{ toJSON(github.event.commits.*.message) }}'
-          VERSION=$(echo "$COMMITS" | grep -oP 'release\(node\): v\K[0-9.]+' | tail -1)
+          VERSION=$(echo "$COMMITS" | sed -n 's/.*release(node): v\([0-9.]*\).*/\1/p' | tail -1)
           if [[ -n "$VERSION" ]]; then
             echo "publish=true" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT

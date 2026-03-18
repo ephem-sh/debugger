@@ -16,12 +16,12 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "publish=true" >> $GITHUB_OUTPUT
-            VERSION=$(grep -m1 '^version' packages/debugger-rs/Cargo.toml | grep -oP '"\\K[0-9.]+')
+            VERSION=$(grep -m1 '^version' packages/debugger-rs/Cargo.toml | sed 's/.*"\(.*\)".*/\1/')
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             exit 0
           fi
           COMMITS='${{ toJSON(github.event.commits.*.message) }}'
-          VERSION=$(echo "$COMMITS" | grep -oP 'release\(rust\): v\K[0-9.]+' | tail -1)
+          VERSION=$(echo "$COMMITS" | sed -n 's/.*release(rust): v\([0-9.]*\).*/\1/p' | tail -1)
           if [[ -n "$VERSION" ]]; then
             echo "publish=true" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
