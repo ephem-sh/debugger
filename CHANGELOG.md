@@ -1,5 +1,8 @@
 # Changelog
 
+### ephem-debugger-rs v0.3.3 (2026-03-18)
+
+
 ### ephem-debugger-rs v0.3.2 (2026-03-18)
 - fix: restore versions, simplify release script, single changelog
 
