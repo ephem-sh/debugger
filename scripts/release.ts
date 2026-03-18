@@ -1,70 +1,53 @@
-import { $ } from "bun";
+/**
+ * Simple release script.
+ *
+ * Usage:
+ *   bun release node          # bump node package
+ *   bun release go             # bump go package
+ *   bun release python         # bump python package
+ *   bun release rust           # bump rust package
+ *   bun release all            # bump all with changes
+ *   bun release node --dry     # show what would happen
+ *   bun release node patch     # force patch bump (default)
+ *   bun release node minor     # force minor bump
+ *   bun release node major     # force major bump
+ */
 
 type PackageName = "node" | "go" | "python" | "rust";
+type BumpType = "major" | "minor" | "patch";
 
 interface PackageConfig {
   dir: string;
   versionFile: string | null;
-  tagPrefix: string;
-  changelog: string;
   displayName: string;
+  commitPrefix: string;
 }
 
 const PACKAGES: Record<PackageName, PackageConfig> = {
   node: {
     dir: "packages/debugger",
     versionFile: "packages/debugger/package.json",
-    tagPrefix: "debugger",
-    changelog: "packages/debugger/CHANGELOG.md",
     displayName: "@ephem-sh/debugger",
+    commitPrefix: "release(node)",
   },
   go: {
     dir: "packages/debugger-go",
     versionFile: null,
-    tagPrefix: "debugger-go",
-    changelog: "packages/debugger-go/CHANGELOG.md",
-    displayName: "debugger-go",
+    displayName: "ephem-debugger-go",
+    commitPrefix: "release(go)",
   },
   python: {
     dir: "packages/debugger-py",
     versionFile: "packages/debugger-py/pyproject.toml",
-    tagPrefix: "debugger-py",
-    changelog: "packages/debugger-py/CHANGELOG.md",
-    displayName: "ephem-debugger",
+    displayName: "ephem-debugger-py",
+    commitPrefix: "release(python)",
   },
   rust: {
     dir: "packages/debugger-rs",
     versionFile: "packages/debugger-rs/Cargo.toml",
-    tagPrefix: "debugger-rs",
-    changelog: "packages/debugger-rs/CHANGELOG.md",
-    displayName: "ephem-debugger",
+    displayName: "ephem-debugger-rs",
+    commitPrefix: "release(rust)",
   },
-};
-
-type BumpType = "major" | "minor" | "patch";
-
-interface ParsedCommit {
-  hash: string;
-  shortHash: string;
-  type: string;
-  message: string;
-}
-
-const CHANGELOG_TYPES: Record<string, string> = {
-  feat: "Added",
-  fix: "Fixed",
-  refactor: "Changed",
-  perf: "Changed",
-};
-
-const BUMP_TYPES: Record<string, BumpType> = {
-  feat: "minor",
-  fix: "patch",
-  refactor: "patch",
-  perf: "patch",
-  docs: "patch",
-  chore: "patch",
-  test: "patch",
 };
 
 async function run(cmd: string[]): Promise<string> {
@@ -74,166 +57,87 @@ async function run(cmd: string[]): Promise<string> {
   return text.trim();
 }
 
-function parseVersion(version: string): [number, number, number] {
-  const [major, minor, patch] = version.split(".").map(Number);
-  return [major ?? 0, minor ?? 0, patch ?? 0];
+function parseVersion(v: string): [number, number, number] {
+  const [a, b, c] = v.split(".").map(Number);
+  return [a ?? 0, b ?? 0, c ?? 0];
 }
 
 function bumpVersion(current: string, bump: BumpType): string {
   const [major, minor, patch] = parseVersion(current);
   switch (bump) {
-    case "major":
-      return `${major + 1}.0.0`;
-    case "minor":
-      return `${major}.${minor + 1}.0`;
-    case "patch":
-      return `${major}.${minor}.${patch + 1}`;
+    case "major": return `${major + 1}.0.0`;
+    case "minor": return `${major}.${minor + 1}.0`;
+    case "patch": return `${major}.${minor}.${patch + 1}`;
   }
 }
 
-async function getLastTag(tagPrefix: string): Promise<string | null> {
-  const tags = await run([
-    "git",
-    "tag",
-    "--list",
-    `${tagPrefix}-v*`,
-    "--sort=-v:refname",
-  ]);
-  if (!tags) return null;
-  return tags.split("\n")[0] ?? null;
-}
-
-async function getCommitsSince(
-  lastTag: string | null,
-  dir: string
-): Promise<ParsedCommit[]> {
-  const range = lastTag ? `${lastTag}..HEAD` : "HEAD";
-  const args = [
-    "git",
-    "log",
-    range,
-    "--pretty=format:%H %s",
-    "--",
-    `${dir}/`,
-  ];
-  const output = await run(args);
-  if (!output) return [];
-
-  return output.split("\n").flatMap((line) => {
-    const spaceIdx = line.indexOf(" ");
-    if (spaceIdx === -1) return [];
-    const hash = line.slice(0, spaceIdx);
-    const subject = line.slice(spaceIdx + 1);
-    const colonIdx = subject.indexOf(":");
-    if (colonIdx === -1) return [];
-    const type = subject.slice(0, colonIdx).trim().toLowerCase();
-    const message = subject.slice(colonIdx + 1).trim();
-    return [{ hash, shortHash: hash.slice(0, 7), type, message }];
-  });
-}
-
-async function readCurrentVersion(
-  pkg: PackageConfig,
-  lastTag: string | null
-): Promise<string> {
-  if (!pkg.versionFile) {
-    if (lastTag) {
-      const v = lastTag.replace(/^.*-v/, "");
-      return v ?? "0.0.0";
-    }
-    return "0.0.0";
-  }
-
+async function readVersion(pkg: PackageConfig): Promise<string> {
+  if (!pkg.versionFile) return "0.1.0";
   const content = await Bun.file(pkg.versionFile).text();
   const ext = pkg.versionFile.split(".").pop();
-
   if (ext === "json") {
-    const json = JSON.parse(content) as { version?: string };
-    return json.version ?? "0.0.0";
+    return (JSON.parse(content) as { version?: string }).version ?? "0.1.0";
   }
-
   if (ext === "toml") {
     const match = content.match(/^version\s*=\s*"([^"]+)"/m);
-    return match?.[1] ?? "0.0.0";
+    return match?.[1] ?? "0.1.0";
   }
-
-  return "0.0.0";
+  return "0.1.0";
 }
 
-function determineBump(commits: ParsedCommit[]): BumpType {
-  let bump: BumpType = "patch";
-  for (const c of commits) {
-    if (c.type === "breaking") return "major";
-    if (c.type === "feat" && bump !== "major") bump = "minor";
-  }
-  return bump;
-}
-
-function generateChangelog(
-  version: string,
-  commits: ParsedCommit[]
-): string {
-  const date = new Date().toISOString().slice(0, 10);
-  const sections: Record<string, string[]> = {};
-
-  for (const c of commits) {
-    const category = CHANGELOG_TYPES[c.type];
-    if (!category) continue;
-    if (!sections[category]) sections[category] = [];
-    sections[category].push(`- ${c.message} (${c.shortHash})`);
-  }
-
-  let entry = `## ${version} (${date})\n`;
-  for (const [heading, items] of Object.entries(sections)) {
-    entry += `\n### ${heading}\n`;
-    for (const item of items) {
-      entry += `${item}\n`;
-    }
-  }
-
-  return entry;
-}
-
-async function updateVersionFile(
-  pkg: PackageConfig,
-  newVersion: string
-): Promise<void> {
+async function writeVersion(pkg: PackageConfig, version: string): Promise<void> {
   if (!pkg.versionFile) return;
-
   const content = await Bun.file(pkg.versionFile).text();
   const ext = pkg.versionFile.split(".").pop();
-  let updated: string;
-
   if (ext === "json") {
     const json = JSON.parse(content) as Record<string, unknown>;
-    json.version = newVersion;
-    updated = JSON.stringify(json, null, 2) + "\n";
+    json.version = version;
+    await Bun.write(pkg.versionFile, JSON.stringify(json, null, 2) + "\n");
   } else if (ext === "toml") {
-    updated = content.replace(
-      /^(version\s*=\s*)"[^"]+"/m,
-      `$1"${newVersion}"`
+    await Bun.write(
+      pkg.versionFile,
+      content.replace(/^(version\s*=\s*)"[^"]+"/m, `$1"${version}"`)
     );
-  } else {
-    return;
   }
-
-  await Bun.write(pkg.versionFile, updated);
 }
 
-async function prependChangelog(
-  changelogPath: string,
-  entry: string
+async function getCommitsSince(dir: string): Promise<string[]> {
+  // Get commits that touched this package since the last release commit for it
+  const lastRelease = await run([
+    "git", "log", "--all", "--pretty=format:%H %s", "--", `${dir}/`,
+  ]);
+  const lines = lastRelease.split("\n").filter(Boolean);
+
+  const commits: string[] = [];
+  for (const line of lines) {
+    const msg = line.slice(line.indexOf(" ") + 1);
+    if (msg.startsWith("release(")) break; // stop at last release
+    commits.push(msg);
+  }
+  return commits;
+}
+
+async function appendChangelog(
+  pkgName: string,
+  displayName: string,
+  version: string,
+  commits: string[]
 ): Promise<void> {
-  const file = Bun.file(changelogPath);
+  const date = new Date().toISOString().slice(0, 10);
+  let entry = `### ${displayName} v${version} (${date})\n`;
+  for (const c of commits) {
+    entry += `- ${c}\n`;
+  }
+  entry += "\n";
+
+  const file = Bun.file("CHANGELOG.md");
   const existing = (await file.exists()) ? await file.text() : "";
 
   if (existing.startsWith("# Changelog")) {
     const rest = existing.slice(existing.indexOf("\n") + 1);
-    await Bun.write(changelogPath, `# Changelog\n\n${entry}\n${rest}`);
-  } else if (existing) {
-    await Bun.write(changelogPath, `${entry}\n${existing}`);
+    await Bun.write("CHANGELOG.md", `# Changelog\n\n${entry}${rest}`);
   } else {
-    await Bun.write(changelogPath, `# Changelog\n\n${entry}\n`);
+    await Bun.write("CHANGELOG.md", `# Changelog\n\n${entry}`);
   }
 }
 
@@ -245,134 +149,71 @@ async function confirm(prompt: string): Promise<boolean> {
   return false;
 }
 
+async function releaseOne(name: PackageName, bump: BumpType, dry: boolean): Promise<boolean> {
+  const pkg = PACKAGES[name];
+  const currentVersion = await readVersion(pkg);
+  const nextVersion = bumpVersion(currentVersion, bump);
+  const commits = await getCommitsSince(pkg.dir);
+  const commitMsg = `${pkg.commitPrefix}: v${nextVersion}`;
+
+  console.log(`\n${pkg.displayName}  ${currentVersion} → ${nextVersion} (${bump})`);
+  if (commits.length > 0) {
+    console.log(`  ${commits.length} commit(s):`);
+    for (const c of commits.slice(0, 5)) console.log(`    - ${c}`);
+    if (commits.length > 5) console.log(`    ... and ${commits.length - 5} more`);
+  }
+  console.log(`  Commit: ${commitMsg}`);
+
+  if (dry) return false;
+
+  const yes = await confirm("\n  Release? (y/n) ");
+  if (!yes) {
+    console.log("  Skipped");
+    return false;
+  }
+
+  await writeVersion(pkg, nextVersion);
+  await appendChangelog(name, pkg.displayName, nextVersion, commits);
+
+  const filesToAdd = ["CHANGELOG.md"];
+  if (pkg.versionFile) filesToAdd.push(pkg.versionFile);
+
+  await run(["git", "add", ...filesToAdd]);
+  await run(["git", "commit", "-m", commitMsg]);
+
+  console.log(`  Done.`);
+  return true;
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const pkgName = args.find((a) => !a.startsWith("-")) as
-    | PackageName
-    | undefined;
   const dry = args.includes("--dry");
+  const filtered = args.filter((a) => !a.startsWith("-"));
+  const pkgName = filtered[0] as PackageName | "all" | undefined;
+  const bumpArg = (filtered[1] as BumpType) || "patch";
 
-  if (!pkgName || (!PACKAGES[pkgName as PackageName] && pkgName !== "all")) {
-    console.error(
-      "Usage: bun run release <node|go|python|rust|all> [--dry]"
-    );
+  if (!pkgName || (pkgName !== "all" && !PACKAGES[pkgName])) {
+    console.error("Usage: bun release <node|go|python|rust|all> [patch|minor|major] [--dry]");
     process.exit(1);
   }
 
   const status = await run(["git", "status", "--porcelain"]);
   if (status) {
-    console.warn("Warning: working tree has uncommitted changes\n");
+    console.warn("Warning: uncommitted changes\n");
   }
 
   if (pkgName === "all") {
-    await releaseAll(dry);
-  } else {
-    await releaseOne(pkgName as PackageName, dry);
-  }
-}
-
-async function releaseAll(dry: boolean): Promise<void> {
-  const pending: { name: PackageName; pkg: PackageConfig; commits: ParsedCommit[]; currentVersion: string; bump: BumpType; nextVersion: string }[] = [];
-
-  for (const [name, pkg] of Object.entries(PACKAGES) as [PackageName, PackageConfig][]) {
-    const lastTag = await getLastTag(pkg.tagPrefix);
-    const commits = await getCommitsSince(lastTag, pkg.dir);
-    if (commits.length === 0) continue;
-    const currentVersion = await readCurrentVersion(pkg, lastTag);
-    const bump = determineBump(commits);
-    const nextVersion = bumpVersion(currentVersion, bump);
-    pending.push({ name, pkg, commits, currentVersion, bump, nextVersion });
-  }
-
-  if (pending.length === 0) {
-    console.log("No packages have changes to release");
-    return;
-  }
-
-  console.log(`${pending.length} package(s) ready to release:\n`);
-  for (const p of pending) {
-    console.log(`  ${p.pkg.displayName}  ${p.currentVersion} → ${p.nextVersion} (${p.bump})`);
-  }
-  console.log();
-
-  if (dry) {
-    for (const p of pending) {
-      const changelogEntry = generateChangelog(p.nextVersion, p.commits);
-      console.log(`--- ${p.name} ---`);
-      console.log(changelogEntry);
+    const names = Object.keys(PACKAGES) as PackageName[];
+    let released = false;
+    for (const name of names) {
+      const did = await releaseOne(name, bumpArg, dry);
+      if (did) released = true;
     }
-    return;
+    if (released) console.log(`\nPush when ready: git push`);
+  } else {
+    const did = await releaseOne(pkgName, bumpArg, dry);
+    if (did) console.log(`\nPush when ready: git push`);
   }
-
-  const yes = await confirm("Release all? (y/n) ");
-  if (!yes) {
-    console.log("Aborted");
-    process.exit(0);
-  }
-
-  for (const p of pending) {
-    console.log(`\nReleasing ${p.pkg.displayName} ${p.nextVersion}...`);
-    const changelogEntry = generateChangelog(p.nextVersion, p.commits);
-    const tagName = `${p.pkg.tagPrefix}-v${p.nextVersion}`;
-    const commitMsg = `release(${p.name}): v${p.nextVersion}`;
-
-    await updateVersionFile(p.pkg, p.nextVersion);
-    await prependChangelog(p.pkg.changelog, changelogEntry);
-
-    const filesToAdd = [p.pkg.changelog];
-    if (p.pkg.versionFile) filesToAdd.push(p.pkg.versionFile);
-
-    await run(["git", "add", ...filesToAdd]);
-    await run(["git", "commit", "-m", commitMsg]);
-    await run(["git", "tag", tagName]);
-  }
-
-  console.log(`\nDone. Push when ready:\n  git push\n  git push --tags`);
-}
-
-async function releaseOne(pkgName: PackageName, dry: boolean): Promise<void> {
-  const pkg = PACKAGES[pkgName];
-  const lastTag = await getLastTag(pkg.tagPrefix);
-  const commits = await getCommitsSince(lastTag, pkg.dir);
-
-  if (commits.length === 0) {
-    console.log("No changes to release");
-    process.exit(0);
-  }
-
-  const currentVersion = await readCurrentVersion(pkg, lastTag);
-  const bump = determineBump(commits);
-  const nextVersion = bumpVersion(currentVersion, bump);
-  const changelogEntry = generateChangelog(nextVersion, commits);
-  const tagName = `${pkg.tagPrefix}-v${nextVersion}`;
-  const commitMsg = `release(${pkgName}): v${nextVersion}`;
-
-  console.log(
-    `${pkg.displayName}  ${currentVersion} → ${nextVersion} (${bump})\n`
-  );
-  console.log(changelogEntry);
-  console.log(`Commit: ${commitMsg}`);
-  console.log(`Tag:    ${tagName}`);
-
-  if (dry) return;
-
-  const yes = await confirm("\nRelease? (y/n) ");
-  if (!yes) {
-    console.log("Aborted");
-    process.exit(0);
-  }
-
-  await updateVersionFile(pkg, nextVersion);
-  await prependChangelog(pkg.changelog, changelogEntry);
-
-  const filesToAdd = [pkg.changelog];
-  if (pkg.versionFile) filesToAdd.push(pkg.versionFile);
-
-  await run(["git", "add", ...filesToAdd]);
-  await run(["git", "commit", "-m", commitMsg]);
-  await run(["git", "tag", tagName]);
-
-  console.log(`\nDone. Push when ready:\n  git push\n  git push --tags`);
 }
 
 main();
