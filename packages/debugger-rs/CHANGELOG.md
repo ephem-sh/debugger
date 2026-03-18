@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 (2026-03-18)
+
+### Fixed
+- add repository urls to go, python, rust packages (4c14489)
+
+
 ## 0.3.0 (2026-03-17)
 
 ### Added
