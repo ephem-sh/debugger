@@ -18,14 +18,15 @@ jobs:
             echo "publish=true" >> $GITHUB_OUTPUT
             VERSION=$(node -e "console.log(require('./packages/debugger/package.json').version)")
             echo "version=$VERSION" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          COMMITS='${{ toJSON(github.event.commits.*.message) }}'
+          VERSION=$(echo "$COMMITS" | grep -oP 'release\(node\): v\K[0-9.]+' | tail -1)
+          if [[ -n "$VERSION" ]]; then
+            echo "publish=true" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
           else
-            MSG=$(git log -1 --pretty=%s)
-            if [[ "$MSG" =~ ^release\(node\):\ v(.+)$ ]]; then
-              echo "publish=true" >> $GITHUB_OUTPUT
-              echo "version=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-            else
-              echo "publish=false" >> $GITHUB_OUTPUT
-            fi
+            echo "publish=false" >> $GITHUB_OUTPUT
           fi
 
   publish:
