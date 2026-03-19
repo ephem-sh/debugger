@@ -1,13 +1,23 @@
 ---
 title: Hono
 description: Set up debugger in a Hono project.
-order: 25
+order: 13
+updated: 2026-03-19
 ---
 
 # Hono
 
 This guide covers adding debugger to a [Hono](https://hono.dev)
 project. The setup takes one line.
+
+[Hono official docs](https://hono.dev)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -44,7 +54,13 @@ Add script tags before `</body>` in your HTML responses:
 
 ```bash
 bun run --hot src/index.ts
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
 ```
 

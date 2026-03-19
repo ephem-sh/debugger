@@ -1,0 +1,122 @@
+---
+title: Protocol
+description: NDJSON protocol specification for communication between the IPC bridge and CLI
+order: 3
+updated: 2026-03-19
+---
+
+debugger uses a line-delimited JSON (NDJSON) protocol for
+communication between the IPC bridge and the CLI. Each message is a
+single JSON object terminated by a newline. This protocol is
+language-agnostic — all four language packages implement it
+identically.
+
+## Entry types
+
+Four entry types flow into the log store. Each type is a
+discriminated union member keyed by the `type` field.
+
+### Console entry
+
+```type-table
+# ConsoleEntry
+type | "console" | - | Entry type discriminator
+id | string | - | 6-character hex ID, assigned by the store (optional on input)
+level | "log" \| "warn" \| "error" \| "debug" \| "info" | - | Console method that produced the entry
+args | unknown[] | - | Serialized arguments passed to console
+timestamp | number | - | Unix epoch in milliseconds
+source | "browser" \| "server" | - | Where the entry originated
+```
+
+### Error entry
+
+```type-table
+# ErrorEntry
+type | "error" | - | Entry type discriminator
+id | string | - | 6-character hex ID (optional on input)
+message | string | - | Error message
+stack | string | - | Stack trace (optional)
+timestamp | number | - | Unix epoch in milliseconds
+source | "browser" \| "server" | - | Where the error occurred
+url | string | - | Page URL, browser only (optional)
+component | string | - | Framework component name (optional)
+```
+
+### Network entry
+
+```type-table
+# NetworkEntry
+type | "network" | - | Entry type discriminator
+id | string | - | 6-character hex ID (optional on input)
+url | string | - | Request URL
+method | string | - | HTTP method or "WS" for WebSocket
+status | number | - | HTTP status code
+duration | number | - | Round-trip time in milliseconds
+timestamp | number | - | Unix epoch in milliseconds
+failed | boolean | - | Whether the request failed
+source | "browser" | - | Always "browser"
+kind | "fetch" \| "xhr" \| "ws" | - | Request API used (optional)
+requestHeaders | Record<string, string> | - | Request headers (optional)
+responseHeaders | Record<string, string> | - | Response headers (optional)
+responseBody | string | - | Response body, capped at 4 KB (optional)
+connectionId | string | - | WebSocket connection ID (optional)
+messageCount | number | - | WebSocket message count (optional)
+wsReadyState | number | - | WebSocket ready state (optional)
+```
+
+### App entry
+
+```type-table
+# AppEntry
+type | "app" | - | Entry type discriminator
+id | string | - | 6-character hex ID (optional on input)
+timestamp | number | - | Unix epoch in milliseconds
+source | "browser" | - | Always "browser"
+cookies | CookieInfo[] | - | Browser cookies (optional)
+localStorage | Record<string, string> | - | Local storage key-value pairs (optional)
+sessionStorage | Record<string, string> | - | Session storage key-value pairs (optional)
+serviceWorkers | ServiceWorkerInfo[] | - | Registered service workers (optional)
+cacheStorage | CacheInfo[] | - | Cache storage entries (optional)
+permissions | PermissionInfo[] | - | Browser permission states (optional)
+storageEstimate | object | - | Storage usage and quota in bytes (optional)
+```
+
+## Request format
+
+The CLI sends a single request per connection. The `command` field
+determines which buffer to query, and `filters` narrow the results.
+
+```type-table
+# QueryRequest
+id | string | - | Unique request identifier
+command | string | - | One of: "console", "errors", "network", "app", "status", "all", "push"
+filters.last | number | - | Time window in milliseconds
+filters.level | string | - | Console level filter
+filters.status | number | - | HTTP status code filter
+filters.failed | boolean | - | Failed requests only
+filters.limit | number | 50 | Maximum entries to return
+filters.source | "browser" \| "server" | - | Source filter
+filters.id | string | - | Single entry ID lookup
+filters.ids | string[] | - | Multiple entry ID lookup
+filters.subcommand | string | - | App subcommand (cookies, storage, etc.)
+filters.name | string | - | Cookie name filter
+filters.key | string | - | Storage key filter
+filters.storageType | "local" \| "session" | - | Storage type filter
+```
+
+## Response format
+
+```type-table
+# QueryResponse
+id | string | - | Matches the request ID
+ok | boolean | - | Whether the query succeeded
+data | LogEntry[] | [] | Array of matching entries
+session | SessionInfo | - | Session metadata (included with status)
+error | string | - | Error message if ok is false
+```
+
+## Transport
+
+Each CLI invocation opens a new socket connection, writes one NDJSON
+line (the request), reads one NDJSON line (the response), and closes
+the connection. There is no persistent connection or streaming.

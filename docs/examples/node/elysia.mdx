@@ -1,13 +1,23 @@
 ---
 title: Elysia
 description: Set up debugger in an Elysia project.
-order: 26
+order: 14
+updated: 2026-03-19
 ---
 
 # Elysia
 
 This guide covers adding debugger to an [Elysia](https://elysiajs.com)
 project. The setup takes one line.
+
+[Elysia official docs](https://elysiajs.com)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -45,7 +55,13 @@ Add script tags before `</body>` in your HTML responses:
 
 ```bash
 bun run --watch src/index.ts
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
 ```
 

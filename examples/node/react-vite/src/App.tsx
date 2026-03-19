@@ -100,15 +100,52 @@ function App() {
           <div style={btnGroup}>
             <button
               style={btnStyle}
-              onClick={() => fetch("/api/test?id=" + crypto.randomUUID().slice(0, 8))}
+              onClick={() =>
+                fetch("https://jsonplaceholder.typicode.com/posts/1")
+              }
             >
-              Fetch success
+              GET request
             </button>
             <button
               style={btnStyle}
-              onClick={() => fetch("/api/test?error=true&id=" + crypto.randomUUID().slice(0, 8))}
+              onClick={() =>
+                fetch("https://jsonplaceholder.typicode.com/posts", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-Debug-Id": crypto.randomUUID().slice(0, 8),
+                  },
+                  body: JSON.stringify({
+                    title: "test post",
+                    body: "created by debugger test page",
+                    userId: 1,
+                  }),
+                })
+              }
             >
-              Fetch error
+              POST with headers
+            </button>
+            <button
+              style={btnStyle}
+              onClick={() =>
+                fetch("/api/nonexistent-" + crypto.randomUUID().slice(0, 8))
+              }
+            >
+              404 request
+            </button>
+            <button
+              style={btnStyle}
+              onClick={() => {
+                const ws = new WebSocket(
+                  "wss://echo.websocket.org"
+                );
+                ws.onopen = () => {
+                  ws.send("hello from debugger");
+                  setTimeout(() => ws.close(), 2000);
+                };
+              }}
+            >
+              WebSocket
             </button>
           </div>
         </section>

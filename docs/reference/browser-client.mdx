@@ -1,0 +1,96 @@
+---
+title: Browser client
+description: How the browser client captures console output, errors, network requests, and application state
+order: 5
+updated: 2026-03-19
+---
+
+The browser client is a lightweight script that captures runtime data
+from the browser. It intercepts console output, JavaScript errors,
+network requests, and periodically snapshots application state like
+cookies and storage. All captured data is sent to the dev server for
+querying through the CLI.
+
+## How it gets loaded
+
+The browser client is loaded in one of two ways depending on your
+framework.
+
+- **Automatic injection.** Frameworks with HTML rendering inject the
+  script automatically. This includes Vite, Next.js, SvelteKit,
+  Astro, Nuxt, React Router, Angular, FastAPI, Flask, and Django. No
+  additional setup is needed.
+- **Manual injection.** For frameworks that do not render HTML (for
+  example, Express, Hono, Fastify, Go, and Rust), you add a script
+  tag to your HTML template:
+
+```html
+<script src="/_/d.js"></script>
+```
+
+The script self-guards against double initialization. If it detects
+that it has already been loaded, it no-ops silently.
+
+## What's captured
+
+The browser client intercepts several categories of runtime data and
+sends each entry to the dev server with a timestamp and detected
+browser name.
+
+### Console output
+
+The client intercepts all console methods: `log`, `warn`, `error`,
+`debug`, and `info`. It captures arguments with safe serialization
+that handles circular references, functions, and symbols. Each entry
+includes the detected browser name so you can distinguish output
+from different browsers during testing.
+
+### Errors
+
+The client captures `window.onerror` and `unhandledrejection` events.
+Each error entry includes the error message, stack trace, and source
+URL when available.
+
+### Network requests
+
+The client patches `fetch()` and `XMLHttpRequest` to capture the
+method, URL, status code, duration, request and response headers,
+and response body (capped at 4 KB for failed requests). It also
+tracks WebSocket connections, including message count and ready
+state.
+
+### Application state
+
+The client periodically snapshots application state every 10 seconds
+and on storage change events. The following data is captured:
+
+- **Cookies** — name, value, domain, path, expiry, secure flag, and
+  SameSite attribute
+- **localStorage and sessionStorage** — key-value pairs from both
+  storage types
+- **Service workers** — scope, script URL, and registration state
+- **Cache storage** — cache names and entry counts
+- **Permissions** — geolocation, notifications, camera, microphone,
+  and clipboard
+- **Storage quota** — current usage and total quota in bytes
+
+## Data transport
+
+Captured entries are batched before being sent to the dev server.
+The client accumulates up to 10 entries or waits 100 milliseconds,
+whichever comes first, then sends the batch.
+
+Batches are sent via `sendBeacon()` when available, with a fallback
+to `fetch()` using the `keepalive` option. All data is posted to
+`/_/d` on the same origin. When the page is hidden or the visibility
+state changes, any remaining entries in the buffer are flushed
+immediately.
+
+## Browser detection
+
+The client detects 50+ browser types by parsing the user agent
+string. Detected browsers include Chrome, Firefox, Safari, Edge,
+Brave, Arc, Opera, and many others. The detected browser name appears
+in CLI output alongside each browser entry, making it straightforward
+to distinguish data from different browsers during cross-browser
+testing.

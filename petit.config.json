@@ -1,0 +1,20 @@
+{
+  "title": "Debugger",
+  "logo": "logo.png",
+  "repository": "https://github.com/ephem-sh/debugger",
+  "branch": "develop",
+  "siteUrl": "https://debugger.ephem.sh",
+  "defaultScheme": "dark",
+  "schemeSwitcher": true,
+  "theme": "void",
+  "maxWidth": "lg",
+  "sidebarPosition": "center",
+  "toc": true,
+  "deploy": "vercel",
+  "credits": true,
+  "sidebar": [
+    { "label": "Introduction", "path": "./docs/introduction" },
+    { "label": "Examples", "path": "./docs/examples" },
+    { "label": "Reference", "path": "./docs/reference" }
+  ]
+}

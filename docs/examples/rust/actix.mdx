@@ -1,13 +1,23 @@
 ---
-title: Rust + Actix-web
+title: Actix-web
 description: Set up debugger in a Rust project using the Actix-web framework.
-order: 21
+order: 2
+updated: 2026-03-19
 ---
 
 # Rust + Actix-web
 
 This guide covers adding debugger to a Rust API using
 [Actix-web](https://actix.rs).
+
+[Actix-web official docs](https://actix.rs)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Via tracing |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Prerequisites
 
@@ -53,7 +63,13 @@ async fn main() -> std::io::Result<()> {
 
 ```bash
 cargo run
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg server console
 ```
 

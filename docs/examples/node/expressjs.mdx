@@ -1,13 +1,23 @@
 ---
 title: Express
 description: Set up debugger in an Express.js project.
-order: 24
+order: 12
+updated: 2026-03-19
 ---
 
 # Express
 
 This guide covers adding debugger to an [Express](https://expressjs.com)
 project. The setup takes one line.
+
+[Express official docs](https://expressjs.com)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -46,8 +56,17 @@ HTML templates:
 
 ```bash
 node index.ts
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
+```
+
+```command npm pnpm bun yarn live
 dbg server console
 ```
 

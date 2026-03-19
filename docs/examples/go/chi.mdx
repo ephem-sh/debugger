@@ -1,7 +1,8 @@
 ---
-title: Go + Chi
+title: Chi
 description: Set up debugger in a Go project using the Chi router.
-order: 16
+order: 3
+updated: 2026-03-19
 ---
 
 # Go + Chi
@@ -9,6 +10,15 @@ order: 16
 This guide covers adding debugger to a Go API using the
 [Chi](https://github.com/go-chi/chi) router. The setup takes three
 lines of code.
+
+[Chi official docs](https://github.com/go-chi/chi)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Via slog |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Prerequisites
 
@@ -96,8 +106,11 @@ The terminal shows the session ID:
 
 Open another terminal and query:
 
-```bash
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg server console
 ```
 
@@ -164,12 +177,24 @@ templates:
 
 ### 3. Query browser data
 
-```bash
-dbg browser console       # browser console logs
-dbg browser errors        # runtime errors
-dbg browser network       # fetch/XHR requests
-dbg browser cookies       # document cookies
-dbg browser storage       # localStorage + sessionStorage
+```command npm pnpm bun yarn live
+dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg browser errors
+```
+
+```command npm pnpm bun yarn live
+dbg browser network
+```
+
+```command npm pnpm bun yarn live
+dbg browser cookies
+```
+
+```command npm pnpm bun yarn live
+dbg browser storage
 ```
 
 ## Full example

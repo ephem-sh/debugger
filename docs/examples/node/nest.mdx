@@ -1,13 +1,23 @@
 ---
 title: NestJS
 description: Set up debugger in a NestJS project.
-order: 28
+order: 16
+updated: 2026-03-19
 ---
 
 # NestJS
 
 This guide covers adding debugger to a [NestJS](https://nestjs.com)
 project. The setup takes two steps.
+
+[NestJS official docs](https://nestjs.com)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -55,7 +65,13 @@ Add script tags before `</body>` in your HTML templates:
 
 ```bash
 npm run start:dev
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
 ```
 

@@ -1,7 +1,8 @@
 ---
 title: CLI reference
 description: Complete reference for the dbg CLI commands and flags.
-order: 4
+order: 1
+updated: 2026-03-19
 ---
 
 # CLI reference
@@ -13,8 +14,8 @@ Windows named pipes.
 ## Usage
 
 ```
-dbg <scope> <command> [flags]
-dbg <command> [flags]
+npx dbg <scope> <command> [flags]
+npx dbg <command> [flags]
 ```
 
 ## Scopes
@@ -26,15 +27,15 @@ Query browser-side data. All browser commands filter entries where
 
 | Command | Description |
 |---------|-------------|
-| `dbg browser console` | Console logs (log, warn, error, debug, info) |
-| `dbg browser errors` | Runtime errors and unhandled rejections |
-| `dbg browser network` | Network requests (fetch, XHR, WebSocket) |
-| `dbg browser cookies` | Document cookies |
-| `dbg browser storage` | localStorage and sessionStorage |
-| `dbg browser workers` | Service worker registrations |
-| `dbg browser cache` | Cache Storage names and entry counts |
-| `dbg browser permissions` | Browser permission states |
-| `dbg browser quota` | Storage usage and quota |
+| `npx dbg browser console` | Console logs (log, warn, error, debug, info) |
+| `npx dbg browser errors` | Runtime errors and unhandled rejections |
+| `npx dbg browser network` | Network requests (fetch, XHR, WebSocket) |
+| `npx dbg browser cookies` | Document cookies |
+| `npx dbg browser storage` | localStorage and sessionStorage |
+| `npx dbg browser workers` | Service worker registrations |
+| `npx dbg browser cache` | Cache Storage names and entry counts |
+| `npx dbg browser permissions` | Browser permission states |
+| `npx dbg browser quota` | Storage usage and quota |
 
 ### `server`
 
@@ -43,16 +44,16 @@ Query server-side data. All server commands filter entries where
 
 | Command | Description |
 |---------|-------------|
-| `dbg server console` | Server console logs |
-| `dbg server errors` | SSR and runtime errors |
+| `npx dbg server console` | Server console logs |
+| `npx dbg server errors` | SSR and runtime errors |
 
 ## Top-level commands
 
 | Command | Description |
 |---------|-------------|
-| `dbg status` | Display session metadata (ID, framework, port, uptime) |
-| `dbg all` | Display all entries merged by timestamp (default) |
-| `dbg sessions` | List all active debugger sessions |
+| `npx dbg status` | Display session metadata (ID, framework, port, uptime) |
+| `npx dbg all` | Display all entries merged by timestamp (default) |
+| `npx dbg sessions` | List all active debugger sessions |
 
 ## Flags
 
@@ -109,43 +110,43 @@ All flags are optional and can be combined with any command.
 
 View the last 30 seconds of browser console warnings:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser console --level warn --last 30s
 ```
 
 Get failed network requests as JSON:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser network --failed --json
 ```
 
 Inspect a specific network request with headers:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser network --id a1b2c3 --headers --body
 ```
 
 Find a specific cookie:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser cookies --name session_token
 ```
 
 View only localStorage:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser storage --type local
 ```
 
 Look up a specific storage key:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser storage --key user_preferences
 ```
 
 Get everything from the last 5 minutes as JSON:
 
-```bash
+```command npm pnpm bun yarn live
 dbg all --last 5m --json
 ```
 
@@ -157,7 +158,7 @@ list all active sessions and target a specific one by port or ID.
 
 ### List active sessions
 
-```bash
+```command npm pnpm bun yarn live
 dbg sessions
 ```
 
@@ -171,16 +172,25 @@ dbg sessions
 
 ### Target by port
 
-```bash
+```command npm pnpm bun yarn live
 dbg --port 3000 browser console
+```
+
+```command npm pnpm bun yarn live
 dbg --port 5173 browser network
+```
+
+```command npm pnpm bun yarn live
 dbg --port 8000 server console
 ```
 
 ### Target by session ID
 
-```bash
+```command npm pnpm bun yarn live
 dbg --session dev-a1b2c3 status
+```
+
+```command npm pnpm bun yarn live
 dbg --session dev-d4e5f6 browser errors
 ```
 
@@ -196,7 +206,7 @@ by walking parent directories from the current working directory:
 If your dev server runs in a subdirectory, use `--cwd` to point
 to it:
 
-```bash
+```command npm pnpm bun yarn live
 dbg status --cwd ./apps/web
 ```
 
@@ -205,7 +215,7 @@ dbg status --cwd ./apps/web
 When using `--json`, the CLI outputs structured JSON that AI agents
 can parse directly:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser console --json --limit 5
 ```
 

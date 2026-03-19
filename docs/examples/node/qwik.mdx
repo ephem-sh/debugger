@@ -1,13 +1,23 @@
 ---
 title: Qwik
 description: Set up debugger in a Qwik project.
-order: 10
+order: 8
+updated: 2026-03-19
 ---
 
 # Qwik
 
 This guide covers adding debugger to a Qwik City project. The setup
 takes two steps.
+
+[Qwik official docs](https://qwik.builder.io)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## 1. Add the Vite plugin
 
@@ -44,8 +54,14 @@ import { isDev } from '@builder.io/qwik'
 
 ```bash
 npm run dev
-npx dbg status
-npx dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg status
+```
+
+```command npm pnpm bun yarn live
+dbg browser console
 ```
 
 ## Production safety

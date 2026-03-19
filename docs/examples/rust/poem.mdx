@@ -1,13 +1,23 @@
 ---
-title: Rust + Poem
+title: Poem
 description: Set up debugger in a Rust project using the Poem framework.
-order: 23
+order: 4
+updated: 2026-03-19
 ---
 
 # Rust + Poem
 
 This guide covers adding debugger to a Rust API using
 [Poem](https://docs.rs/poem).
+
+[Poem official docs](https://docs.rs/poem)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Via tracing |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Prerequisites
 
@@ -56,7 +66,13 @@ async fn main() {
 
 ```bash
 cargo run
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg server console
 ```
 
@@ -73,10 +89,19 @@ routes. To enable browser capture, add these script tags before
 
 Query browser data with:
 
-```bash
+```command npm pnpm bun yarn live
 dbg browser console
+```
+
+```command npm pnpm bun yarn live
 dbg browser errors
+```
+
+```command npm pnpm bun yarn live
 dbg browser network
+```
+
+```command npm pnpm bun yarn live
 dbg browser storage
 ```
 

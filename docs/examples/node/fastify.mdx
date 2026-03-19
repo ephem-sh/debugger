@@ -1,13 +1,23 @@
 ---
 title: Fastify
 description: Set up debugger in a Fastify project.
-order: 27
+order: 15
+updated: 2026-03-19
 ---
 
 # Fastify
 
 This guide covers adding debugger to a [Fastify](https://fastify.dev)
 project. The setup takes one line.
+
+[Fastify official docs](https://fastify.dev)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -43,7 +53,13 @@ Add script tags before `</body>` in your HTML responses:
 
 ```bash
 node server.mjs
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
 ```
 

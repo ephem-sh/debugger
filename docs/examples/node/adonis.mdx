@@ -1,13 +1,23 @@
 ---
 title: AdonisJS
 description: Set up debugger in an AdonisJS project.
-order: 29
+order: 17
+updated: 2026-03-19
 ---
 
 # AdonisJS
 
 This guide covers adding debugger to an
 [AdonisJS](https://adonisjs.com) project. The setup takes two steps.
+
+[AdonisJS official docs](https://adonisjs.com)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -64,7 +74,13 @@ Add script tags before `</body>` in your Edge layout template
 
 ```bash
 node ace serve --hmr
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
 ```
 

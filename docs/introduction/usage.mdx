@@ -1,0 +1,313 @@
+---
+title: Usage
+description: Practical guide to querying logs and inspecting your application with the CLI
+order: 3
+updated: 2026-03-19
+---
+
+Once debugger is instrumented and your dev server is running, use the
+`dbg` CLI to query captured data. This guide walks through common
+workflows with real output from a Vite + React session. For the
+complete flag reference, see the [CLI reference](/docs/reference/cli).
+
+## Check session status
+
+You can verify that debugger is running and see session metadata with
+the `status` command.
+
+```command npm pnpm bun yarn live
+dbg status
+```
+
+```text
+Session:   dev-9183f9
+Framework: vite
+Port:      5173
+PID:       280288
+Uptime:    3m 32s
+```
+
+The output confirms the bridge is active and tells you which framework
+adapter is in use, what port the dev server listens on, the process
+ID, and how long the session has been running.
+
+## View server logs
+
+The `server console` command shows console output captured from your
+server-side code. Each line includes a timestamp, a short entry ID, the
+log level, the source label, and the message.
+
+```command npm pnpm bun yarn live
+dbg server console
+```
+
+```text
+15:00:05 cbcdb6 LOG   [server] VITE v8.0.0 ready in 234 ms
+15:00:05 109f7e LOG   [server] ➜ Local: http://localhost:5173/
+15:00:28 372c17 WARN  [server] [console.warn] [debugger:test] warn ...
+15:00:28 cd727b ERROR [server] [console.error] [debugger:test] error ...
+```
+
+You can filter by log level to narrow the output:
+
+```bash
+npx dbg server console --level warn
+```
+
+Or filter by time window to see only recent entries:
+
+```bash
+npx dbg server console --last 5m
+```
+
+## View browser logs
+
+The `browser console` command shows console output captured from the
+browser client. Entries cover all log levels and include Vite HMR
+messages alongside your application output.
+
+```command npm pnpm bun yarn live
+dbg browser console
+```
+
+```text
+15:03:11 9c9047 LOG   [browser] [debugger:test] log {"id":"d6d9aff7","ts":"2026-03-19T18:03:11.566Z"}
+15:03:11 8eae90 WARN  [browser] [debugger:test] warn {"id":"e6b8e8e1","ts":"2026-03-19T18:03:11.828Z"}
+15:03:12 f76480 ERROR [browser] [debugger:test] error {"id":"20d8e9f5",...}
+15:03:12 5f59b4 DEBUG [browser] [vite] hot updated: /src/App.tsx
+```
+
+The same filtering flags work here. Use `--level error` to show only
+errors, or `--last 30s` to restrict to recent entries.
+
+## Inspect network requests
+
+The `browser network` command shows fetch, XHR, and WebSocket activity
+captured from the browser. Each line shows the HTTP status, method,
+URL, and duration.
+
+```command npm pnpm bun yarn live
+dbg browser network
+```
+
+```text
+15:03:14 cc636e 200  GET    https://jsonplaceholder.typicode.com/posts/1 (125ms)
+15:03:15 b92adf 201  POST   https://jsonplaceholder.typicode.com/posts (320ms)
+15:03:15 eb3291 200  GET    /api/nonexistent-2fe46bf3 (8ms)
+15:03:16 889159 0    WS     wss://echo.websocket.org (0ms)
+15:03:16 2fa6c7 1005 WS     wss://echo.websocket.org (3044ms)
+```
+
+WebSocket connections appear with a `WS` method and their close code
+as the status. You can filter to show only failed requests or a
+specific status code:
+
+```bash
+npx dbg browser network --failed
+npx dbg browser network --status 201
+```
+
+To inspect a single request in detail, pass its ID along with the
+`--headers` and `--body` flags:
+
+```bash
+npx dbg browser network --id b92adf --headers --body
+```
+
+```text
+ID:       b92adf
+URL:      https://jsonplaceholder.typicode.com/posts
+Method:   POST
+Status:   201
+Duration: 320ms
+Failed:   false
+Kind:     fetch
+Time:     15:03:15
+
+Request Headers:
+  Content-Type: application/json
+  X-Debug-Id: 56b98420
+
+Response Headers:
+  cache-control: no-cache
+  content-length: 97
+  content-type: application/json; charset=utf-8
+  expires: -1
+  location: https://jsonplaceholder.typicode.com/posts/101
+  pragma: no-cache
+```
+
+## Check errors
+
+The `browser errors` command shows runtime errors and unhandled
+promise rejections from the browser. Each entry includes the error
+message and a stack trace.
+
+```command npm pnpm bun yarn live
+dbg browser errors
+```
+
+```text
+15:03:12 265521 ERROR [browser] Uncaught Error: unhandled 8e58bfab
+  Error: unhandled 8e58bfab
+  at http://localhost:5173/src/App.tsx:108:16
+15:03:13 f45519 ERROR [browser] rejection 899ebe9d
+  Error: rejection 899ebe9d
+  at onClick (http://localhost:5173/src/App.tsx:118:39)
+  at executeDispatch (react-dom-client.js:9140:5)
+  at runWithFiberInDEV (react-dom-client.js:850:66)
+  at processDispatchQueue (react-dom-client.js:9166:27)
+```
+
+You can also check server-side errors:
+
+```bash
+npx dbg server errors
+```
+
+Server errors include SSR failures, unhandled exceptions, and any
+errors your framework surfaces during request handling.
+
+## Inspect browser state
+
+debugger captures periodic snapshots of browser application state. You
+can query cookies, storage, permissions, and quota individually.
+
+```accordion
+# Cookies
+
+`npx dbg browser cookies`
+
+```text
+Cookies (3)
+  debugger_fetch_f3442ea0=true
+  dbg_secure_mmxs3phg=secret_u6zb
+  debugger_test_mmxs3ptk=value_l0nd
+```
+
+# Storage
+
+`npx dbg browser storage`
+
+```text
+localStorage (7)
+  dbg_local_mmxs3o9g = {"created":"2026-03-19T18:03:25.972Z","random":0.688575170773545}
+  test key = test value
+  ...
+
+sessionStorage (1)
+  dbg_session_mmxs3q9w = 2026-03-19T18:03:28.580Z
+```
+
+# Permissions
+
+`npx dbg browser permissions`
+
+```text
+Permissions
+  geolocation          denied
+  notifications        prompt
+  camera               prompt
+  microphone           prompt
+  clipboard-read       granted
+  clipboard-write      granted
+```
+
+# Storage quota
+
+`npx dbg browser quota`
+
+```text
+Storage Quota
+  Usage: 482.8 KB
+  Quota: 10.0 GB
+  Used:  0.0%
+```
+```
+
+## View all logs
+
+The `all` command merges server and browser entries into a single
+chronological view. It combines console output, errors, network
+requests, and application state snapshots from both scopes.
+
+```command npm pnpm bun yarn live
+dbg all --limit 10
+```
+
+```text
+15:03:14 cc636e 200  GET    https://jsonplaceholder.typicode.com/posts/1 (125ms)
+15:03:15 b92adf 201  POST   https://jsonplaceholder.typicode.com/posts (320ms)
+15:03:15 eb3291 200  GET    /api/nonexistent-2fe46bf3 (8ms)
+15:03:16 889159 0    WS     wss://echo.websocket.org (0ms)
+15:03:16 2fa6c7 1005 WS     wss://echo.websocket.org (3044ms)
+15:03:18 688428 APP  [browser] 8 cookies, 23 local, 1 session, 0 workers
+15:03:21 e381c7 APP  [browser] 0 cookies, 6 local, 0 session, 0 workers
+15:03:25 d365ec 200  GET    /api/test?id=f3442ea0 (5ms)
+15:03:26 877a83 APP  [browser] 1 cookies, 7 local, 0 session, 0 workers
+15:03:28 6b6770 APP  [browser] 3 cookies, 7 local, 1 session, 0 workers
+```
+
+Use `--limit` to cap the number of entries returned. The `APP` entries
+are periodic browser state snapshots showing cookie, storage, and
+worker counts at a glance.
+
+## Multiple sessions
+
+When you run multiple dev servers at the same time, each one registers
+its own debugger session. The `sessions` command lists all active
+sessions.
+
+```command npm pnpm bun yarn live
+dbg sessions
+```
+
+```text
+  ID             Framework    Port    PID      Dir
+  ────────────── ──────────── ─────── ──────── ────────────────────
+  dev-9183f9     vite         5173    280288   F:\...\react-vite
+```
+
+You can target a specific session by port or session ID:
+
+```bash
+npx dbg server console --port 5173
+npx dbg browser network --session dev-9183f9
+```
+
+This works across languages. You can run a Node.js frontend, a Go
+API, and a Python service, then query each one independently with
+the same CLI.
+
+## JSON output
+
+Every command supports the `--json` flag for structured output. This
+is useful for piping to other tools like `jq` or for consumption by
+AI agents that parse structured data.
+
+```command npm pnpm bun yarn live
+dbg browser console --json --limit 1
+```
+
+```json
+[
+  {
+    "type": "console",
+    "level": "warn",
+    "args": [
+      "[debugger:test] warn",
+      { "id": "e6b8e8e1", "ts": "2026-03-19T18:03:11.828Z" }
+    ],
+    "timestamp": 1773943391828,
+    "source": "browser",
+    "browser": "Chrome",
+    "id": "8eae90"
+  }
+]
+```
+
+For example, to extract only error-level browser logs as JSON:
+
+```bash
+npx dbg browser console --level error --json | jq '.[].args'
+```

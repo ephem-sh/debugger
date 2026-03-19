@@ -1,0 +1,130 @@
+---
+title: Installation
+description: Install debugger for your language and framework
+order: 2
+updated: 2026-03-19
+---
+
+debugger has packages for four languages. Install the one that
+matches your stack, then follow the framework-specific guide to wire
+it into your dev server.
+
+## Node.js
+
+Install the Node.js package with your preferred package manager.
+
+```install
+@ephem-sh/debugger
+```
+
+Each framework has a dedicated adapter import. Pick yours from the
+table below.
+
+| Framework | Adapter import | Guide |
+|-----------|---------------|-------|
+| Next.js | `@ephem-sh/debugger/nextjs` | [Setup guide](/docs/examples/node/nextjs) |
+| Vite + React | `@ephem-sh/debugger/vite` | [Setup guide](/docs/examples/node/vite-react) |
+| Vite + Vue | `@ephem-sh/debugger/vite` | [Setup guide](/docs/examples/node/vite-vue) |
+| SvelteKit | `@ephem-sh/debugger/vite/sveltekit` | [Setup guide](/docs/examples/node/sveltekit) |
+| React Router | `@ephem-sh/debugger/vite/react-router` | [Setup guide](/docs/examples/node/react-router) |
+| Astro | `@ephem-sh/debugger/vite/astro` | [Setup guide](/docs/examples/node/astro) |
+| Nuxt | `@ephem-sh/debugger/nitro` | [Setup guide](/docs/examples/node/nuxt) |
+| Qwik | `@ephem-sh/debugger/vite` | [Setup guide](/docs/examples/node/qwik) |
+| TanStack Start | `@ephem-sh/debugger/vite/tanstack-start` | [Setup guide](/docs/examples/node/tanstack-start) |
+| Waku | `@ephem-sh/debugger/vite` | [Setup guide](/docs/examples/node/waku) |
+| Angular | `@ephem-sh/debugger/angular` | [Setup guide](/docs/examples/node/angular) |
+| Express | `@ephem-sh/debugger/express` | [Setup guide](/docs/examples/node/expressjs) |
+| Hono | `@ephem-sh/debugger/hono` | [Setup guide](/docs/examples/node/hono) |
+| Elysia | `@ephem-sh/debugger/elysia` | [Setup guide](/docs/examples/node/elysia) |
+| Fastify | `@ephem-sh/debugger/fastify` | [Setup guide](/docs/examples/node/fastify) |
+| NestJS | `@ephem-sh/debugger/nest` | [Setup guide](/docs/examples/node/nest) |
+| AdonisJS | `@ephem-sh/debugger/adonis` | [Setup guide](/docs/examples/node/adonis) |
+| Nitro | `@ephem-sh/debugger/nitro` | [Setup guide](/docs/examples/node/nitro) |
+
+## Go
+
+Install the Go module with `go get`.
+
+```bash
+go get github.com/ephem-sh/debugger/packages/ephem-debugger-go
+```
+
+Each framework has a dedicated middleware package.
+
+| Framework | Middleware import | Guide |
+|-----------|-----------------|-------|
+| Gin | `middleware/gin` | [Setup guide](/docs/examples/go/gin) |
+| Echo | `middleware/echo` | [Setup guide](/docs/examples/go/echo) |
+| Chi | `middleware/chi` | [Setup guide](/docs/examples/go/chi) |
+
+## Python
+
+Install the Python package with your preferred tool.
+
+```tabs
+# pip
+pip install ephem-debugger-py
+
+
+# uv
+uv add ephem-debugger-py
+
+```
+
+Each framework requires an extras install for its adapter.
+
+| Framework | Extra | Guide |
+|-----------|-------|-------|
+| FastAPI | `ephem-debugger-py[fastapi]` | [Setup guide](/docs/examples/python/fastapi) |
+| Flask | `ephem-debugger-py[flask]` | [Setup guide](/docs/examples/python/flask) |
+| Django | `ephem-debugger-py[django]` | [Setup guide](/docs/examples/python/django) |
+
+## Rust
+
+Add the crate to your `Cargo.toml` with the appropriate feature
+flag for your framework.
+
+```toml
+[dependencies]
+ephem-debugger-rs = { version = "0.3", features = ["axum"] }
+```
+
+| Framework | Feature flag | Guide |
+|-----------|-------------|-------|
+| Axum | `axum` | [Setup guide](/docs/examples/rust/axum) |
+| Actix | `actix` | [Setup guide](/docs/examples/rust/actix) |
+| Rocket | `rocket` | [Setup guide](/docs/examples/rust/rocket) |
+| Poem | `poem` | [Setup guide](/docs/examples/rust/poem) |
+
+> [!NOTE]
+> The `dbg` CLI is included with the `@ephem-sh/debugger` npm
+> package. Since it's installed as a dev dependency, run it with
+> `npx dbg` (or `pnpm exec dbg`, `bunx dbg`). For Go, Python,
+> and Rust projects, install the Node.js package alongside your
+> language-specific package to get access to the CLI.
+
+## Verify the installation
+
+Once you have debugger installed, confirm that everything is wired
+up correctly.
+
+```steps
+# Start your dev server
+Run your application as you normally would. debugger activates
+automatically in development mode.
+
+# Check the connection
+Open a new terminal in the same project directory and run:
+```command npm pnpm bun yarn live
+dbg status
+```
+You see session information including the framework name, port,
+and process ID.
+
+# View logs
+```command npm pnpm bun yarn live
+dbg all
+```
+
+This shows the most recent console output from both server and
+browser.

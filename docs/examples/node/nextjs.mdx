@@ -1,13 +1,23 @@
 ---
 title: Next.js (App Router)
 description: Set up debugger in a Next.js App Router project.
-order: 3
+order: 1
+updated: 2026-03-19
 ---
 
 # Next.js (App Router)
 
 This guide walks you through adding debugger to a Next.js project
 using the App Router. The setup takes three steps.
+
+[Next.js official docs](https://nextjs.org)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Automatic |
 
 ## Prerequisites
 
@@ -78,12 +88,24 @@ debugger injected at session: dev-abc123
 
 Open your app in a browser, then query with the CLI:
 
-```bash
-npx dbg status
-npx dbg browser console
-npx dbg server console
-npx dbg browser network
-npx dbg browser cookies
+```command npm pnpm bun yarn live
+dbg status
+```
+
+```command npm pnpm bun yarn live
+dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg server console
+```
+
+```command npm pnpm bun yarn live
+dbg browser network
+```
+
+```command npm pnpm bun yarn live
+dbg browser cookies
 ```
 
 ## How it works

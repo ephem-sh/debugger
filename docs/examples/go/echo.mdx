@@ -1,7 +1,8 @@
 ---
-title: Go + Echo
+title: Echo
 description: Set up debugger in a Go project using the Echo framework.
-order: 15
+order: 2
+updated: 2026-03-19
 ---
 
 # Go + Echo
@@ -9,6 +10,15 @@ order: 15
 This guide covers adding debugger to a Go API using the
 [Echo](https://echo.labstack.com) web framework. The setup takes
 three lines of code.
+
+[Echo official docs](https://echo.labstack.com)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Via slog |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Prerequisites
 
@@ -91,8 +101,11 @@ The terminal shows the session ID:
 
 Open another terminal and query:
 
-```bash
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg server console
 ```
 
@@ -159,12 +172,24 @@ templates:
 
 ### 3. Query browser data
 
-```bash
-dbg browser console       # browser console logs
-dbg browser errors        # runtime errors
-dbg browser network       # fetch/XHR requests
-dbg browser cookies       # document cookies
-dbg browser storage       # localStorage + sessionStorage
+```command npm pnpm bun yarn live
+dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg browser errors
+```
+
+```command npm pnpm bun yarn live
+dbg browser network
+```
+
+```command npm pnpm bun yarn live
+dbg browser cookies
+```
+
+```command npm pnpm bun yarn live
+dbg browser storage
 ```
 
 ## Full example

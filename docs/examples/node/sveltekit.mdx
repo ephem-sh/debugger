@@ -1,7 +1,8 @@
 ---
 title: SvelteKit
 description: Set up debugger in a SvelteKit project.
-order: 6
+order: 4
+updated: 2026-03-19
 ---
 
 # SvelteKit
@@ -9,6 +10,15 @@ order: 6
 This guide covers adding debugger to a SvelteKit project. The setup
 takes two steps because SvelteKit uses its own HTML rendering
 pipeline that bypasses Vite's `transformIndexHtml`.
+
+[SvelteKit official docs](https://kit.svelte.dev)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Automatic |
 
 ## Prerequisites
 
@@ -63,10 +73,16 @@ npm run dev
 
 Open your app in a browser, then query with the CLI:
 
-```bash
-npx dbg status
-npx dbg browser console
-npx dbg server console
+```command npm pnpm bun yarn live
+dbg status
+```
+
+```command npm pnpm bun yarn live
+dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg server console
 ```
 
 ## Why two steps?

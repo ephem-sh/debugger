@@ -1,7 +1,8 @@
 ---
 title: Nitro
 description: Set up debugger in a standalone Nitro project.
-order: 30
+order: 18
+updated: 2026-03-19
 ---
 
 # Nitro
@@ -9,6 +10,15 @@ order: 30
 This guide covers adding debugger to a standalone
 [Nitro](https://nitro.build) project with Vite. The setup takes
 three steps.
+
+[Nitro official docs](https://nitro.build)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Install
 
@@ -96,7 +106,13 @@ The Vite plugin auto-injects the debugger script tags into
 
 ```bash
 bun run dev
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg browser console
 ```
 

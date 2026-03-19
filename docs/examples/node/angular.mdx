@@ -1,13 +1,23 @@
 ---
 title: Angular
 description: Set up debugger in an Angular project.
-order: 13
+order: 11
+updated: 2026-03-19
 ---
 
 # Angular
 
 This guide covers adding debugger to an Angular project with SSR.
 The setup takes two steps.
+
+[Angular official docs](https://angular.dev)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## 1. Add script tags to index.html
 
@@ -41,8 +51,14 @@ no-ops when `NODE_ENV` is `production`.
 
 ```bash
 npx ng serve
-npx dbg status
-npx dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg status
+```
+
+```command npm pnpm bun yarn live
+dbg browser console
 ```
 
 ## Production safety

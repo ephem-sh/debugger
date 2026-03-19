@@ -1,0 +1,116 @@
+---
+title: Configuration
+description: Socket paths, production guards, session files, and ingest endpoints
+order: 4
+updated: 2026-03-19
+---
+
+debugger requires zero configuration for development use. This page
+documents the internal configuration details: how socket paths are
+computed, how production environments are detected, and where session
+metadata is stored.
+
+## Socket paths
+
+The IPC socket path depends on your operating system.
+
+```tabs
+# Unix and macOS
+The IPC socket is created inside the project directory:
+```
+{project}/.debugger/bridge.sock
+```
+The `.debugger/` directory is created on startup and cleaned up
+on shutdown.
+
+# Windows
+Windows uses a named pipe:
+```
+\\.\pipe\debugger-{hash}
+```
+The `{hash}` is the first 8 characters of the MD5 hash of the
+current working directory. Named pipes are managed by the OS and
+don't require manual cleanup.
+```
+
+## Session file
+
+On startup, the bridge writes `.debugger/session.json` containing
+metadata about the running dev server.
+
+```json
+{
+  "sessionId": "dev-a1b2c3",
+  "framework": "next",
+  "port": 3000,
+  "pid": 12345,
+  "startedAt": 1710700982000,
+  "socketPath": "/path/to/.debugger/bridge.sock"
+}
+```
+
+The CLI reads this file to discover active sessions. On shutdown,
+the file is deleted.
+
+## Production guards
+
+debugger is designed for development only. Each language has a
+different mechanism for ensuring it doesn't run in production.
+
+```tabs
+# Node.js
+Node.js adapters check `process.env.NODE_ENV`. When set to
+`"production"`, all debugger functions return no-ops. The Vite
+plugin uses `apply: 'serve'` which strips it entirely from
+production builds.
+
+# Go
+Go doesn't have a built-in environment mode. Guard the debugger
+initialization with an environment variable check:
+```go
+if os.Getenv("ENV") != "production" {
+    dbg := debugger.New(debugger.Options{...})
+    defer dbg.Close()
+}
+```
+
+# Python
+Python middleware runs unconditionally. Guard with an environment
+variable:
+```python
+import os
+if os.getenv("ENV") != "production":
+    app.add_middleware(Middleware, port=8000)
+```
+
+# Rust
+Rust middleware runs unconditionally. Guard with a feature flag
+or environment variable:
+```rust
+if std::env::var("ENV").unwrap_or_default() != "production" {
+    // add middleware layers
+}
+```
+```
+
+## Ingest endpoint
+
+The browser client sends captured data to `/_/d` on the same origin
+via POST. The client script is served from `/_/d.js` via GET. These
+endpoints are registered by the framework adapter and don't conflict
+with application routes.
+
+## Ring buffer sizes
+
+Each buffer has a fixed capacity. You cannot change these sizes at
+runtime.
+
+| Buffer | Capacity | Description |
+|--------|----------|-------------|
+| Console | 500 entries | Server and browser console output |
+| Errors | 100 entries | JavaScript errors and unhandled exceptions |
+| Network | 300 entries | HTTP requests and WebSocket connections |
+| App state | 50 entries | Browser state snapshots |
+
+These sizes are fixed and not configurable. When a buffer is full,
+the oldest entry is evicted.

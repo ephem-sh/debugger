@@ -1,0 +1,82 @@
+---
+title: SKILL.md
+description: Agent skill for AI agents to use debugger as a debugging tool during development
+order: 4
+updated: 2026-03-19
+---
+
+debugger ships with a agent skill that teaches AI agents how
+to use it. When the skill is installed, any coding agent working in
+your project can query server logs, browser errors, network requests,
+and application state through the `dbg` CLI without manual guidance.
+
+## What's included
+
+The skill lives in your project at `.claude/skills/debugger/` or `.agents/skills/debugger` and
+contains three files:
+
+| File | Purpose |
+|------|---------|
+| `SKILL.md` | Entry point with a symptom-to-command diagnosis table and a step-by-step debugging workflow |
+| `setup.md` | How to install and instrument debugger for all supported languages and frameworks |
+| `cli.md` | Complete CLI reference with every command, flag, output format, and JSON parsing examples |
+
+## How it works
+
+Agents automatically loads skills from the `.claude/skills/` or `.agents/skills`
+directory. When an agent encounters a runtime error, a failing API
+call, or unexpected behavior, it matches the symptom to the right
+`dbg` command using the diagnosis table:
+
+| Symptom | Command the agent runs |
+|---------|----------------------|
+| Server returning 500 | `npx dbg server errors` |
+| Browser blank page | `npx dbg browser errors` |
+| API request failing | `npx dbg browser network --failed` |
+| Cookie not being set | `npx dbg browser cookies --name session` |
+| Need all recent output | `npx dbg all` |
+
+The agent uses `--json` for structured output it can parse
+programmatically, then acts on the results to fix the issue.
+
+## Adding the skill to your project
+
+If you're using the debugger monorepo, the skill is already at
+`.claude/skills/debugger/` or `.agents/skills/debugger`. For other projects, copy the skill
+directory into your own `.claude/skills/` or `.agents/skills` folder after installing
+debugger as a dependency.
+
+```steps
+# Install debugger
+Follow the [installation guide](/docs/introduction/installation) for
+your language and framework.
+
+# Copy the skill
+Copy the `.claude/skills/debugger/` or `.agents/skills/debugger` directory from the debugger
+repository into your project's `.claude/skills/` or `.agents/skills/` directory.
+
+# Verify
+Start your dev server and ask your coding agent to "check the logs"
+or "debug the server error." It will automatically use the skill.
+```
+
+## Agent workflow
+
+The skill teaches agents a six-step workflow:
+
+1. **Check status** — run `npx dbg status` to confirm debugger is
+   active
+2. **Identify scope** — determine if the problem is server-side or
+   browser-side
+3. **Query** — run the matching command from the diagnosis table
+4. **Filter** — narrow results with `--last`, `--level`, `--status`,
+   `--failed`, or `--limit`
+5. **Inspect details** — for network requests, use
+   `--id <id> --headers --body`
+6. **Act** — fix the code and re-query to verify the fix
+
+> [!TIP]
+> The skill works best when debugger is already instrumented and
+> the dev server is running. If the agent runs `npx dbg status`
+> and gets no session, it falls back to the setup guide
+> automatically.

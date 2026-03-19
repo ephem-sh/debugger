@@ -1,13 +1,23 @@
 ---
-title: Rust + Rocket
+title: Rocket
 description: Set up debugger in a Rust project using the Rocket framework.
-order: 22
+order: 3
+updated: 2026-03-19
 ---
 
 # Rust + Rocket
 
 This guide covers adding debugger to a Rust API using
 [Rocket](https://rocket.rs).
+
+[Rocket official docs](https://rocket.rs)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Via tracing |
+| HTTP requests | Yes |
+| Browser script injection | Manual |
 
 ## Prerequisites
 
@@ -54,7 +64,13 @@ method, path, status, duration).
 
 ```bash
 cargo run
+```
+
+```command npm pnpm bun yarn live
 dbg status
+```
+
+```command npm pnpm bun yarn live
 dbg server console
 ```
 

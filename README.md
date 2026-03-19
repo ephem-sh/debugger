@@ -1,5 +1,7 @@
 # debugger
 
+![debugger demo](docs/media/full-flow.gif)
+
 Dev-only observability for AI agent debugging. 4 languages, 28
 frameworks, zero production footprint.
 

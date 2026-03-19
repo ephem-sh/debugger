@@ -1,7 +1,8 @@
 ---
 title: TanStack Start
 description: Set up debugger in a TanStack Start project.
-order: 11
+order: 9
+updated: 2026-03-19
 ---
 
 # TanStack Start
@@ -9,6 +10,15 @@ order: 11
 This guide covers adding debugger to a TanStack Start project. The
 setup takes three steps because TanStack Start uses Nitro, which runs
 in a separate process from Vite.
+
+[TanStack Start official docs](https://tanstack.com/start)
+
+| Feature | Support |
+|---------|---------|
+| Server console | Yes |
+| Server errors | Yes |
+| HTTP requests | Yes |
+| Browser script injection | Automatic |
 
 ## 1. Add the Vite plugin
 
@@ -50,8 +60,14 @@ export default withDebugger(createServerEntry, handler)
 
 ```bash
 npm run dev
-npx dbg status
-npx dbg browser console
+```
+
+```command npm pnpm bun yarn live
+dbg status
+```
+
+```command npm pnpm bun yarn live
+dbg browser console
 ```
 
 ## Why three steps?

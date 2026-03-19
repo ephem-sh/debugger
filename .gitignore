@@ -79,6 +79,9 @@ examples/**/package-lock.json
 # AdonisJS
 tmp/
 
+# Remotion (GIF generation)
+.remotion/
+
 # Misc
 CLAUDE.md
 publish.md
